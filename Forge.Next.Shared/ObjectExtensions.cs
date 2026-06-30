@@ -34,16 +34,18 @@ public static class ObjectExtensions
     /// <param name="func">The asynchronous function to execute.</param>
     /// <param name="errorType">The <see cref="ErrorType"/> assigned to the error when an exception is caught.</param>
     /// <param name="configureAwait">The value forwarded to <c>ConfigureAwait</c> when awaiting <paramref name="func"/>.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe while awaiting <paramref name="func"/>.</param>
     /// <returns>The result produced by <paramref name="func"/>, or an error describing the caught exception.</returns>
     public static async Task<ErrorOr<TResult>> ProtectAsync<T, TResult>(
         this T @object,
-        Func<T, Task<ErrorOr<TResult>>> func,
+        Func<T, CancellationToken, Task<ErrorOr<TResult>>> func,
         ErrorType errorType = ErrorType.Unexpected,
-        bool configureAwait = false)
+        bool configureAwait = false,
+        CancellationToken cancellationToken = default!)
     {
         try
         {
-            return await func(@object).ConfigureAwait(configureAwait);
+            return await func(@object, cancellationToken).ConfigureAwait(configureAwait);
         }
         catch (Exception ex)
         {
@@ -85,16 +87,18 @@ public static class ObjectExtensions
     /// <param name="func">The asynchronous action to execute.</param>
     /// <param name="errorType">The <see cref="ErrorType"/> assigned to the error when an exception is caught.</param>
     /// <param name="configureAwait">The value forwarded to <c>ConfigureAwait</c> when awaiting <paramref name="func"/>.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe while awaiting <paramref name="func"/>.</param>
     /// <returns><paramref name="object"/> when <paramref name="func"/> completes, or an error describing the caught exception.</returns>
     public static async Task<ErrorOr<T>> ProtectDoAsync<T>(
         this T @object,
-        Func<T, Task> func,
+        Func<T, CancellationToken, Task> func,
         ErrorType errorType = ErrorType.Unexpected,
-        bool configureAwait = false)
+        bool configureAwait = false,
+        CancellationToken cancellationToken = default!)
     {
         try
         {
-            await func(@object).ConfigureAwait(configureAwait);
+            await func(@object, cancellationToken).ConfigureAwait(configureAwait);
             return @object;
         }
         catch (Exception ex)

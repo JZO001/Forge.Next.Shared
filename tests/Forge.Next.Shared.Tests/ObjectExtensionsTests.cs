@@ -61,27 +61,32 @@ public class ObjectExtensionsTests
     }
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, Task{ErrorOr{TResult}}}, ErrorType, bool)"/>.
+    /// Tests <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, CancellationToken)"/>:
+    /// the result is passed through on success, the supplied <see cref="CancellationToken"/> is forwarded to
+    /// the function, and a thrown exception becomes an error carrying the requested <see cref="ErrorType"/>.
     /// </summary>
     [Fact]
     public async Task ProtectAsyncTest()
     {
         SampleDto dto = new() { Id = 1, Name = "x" };
+        using CancellationTokenSource cts = new();
 
         // Success path.
         ErrorOr<int> expected = 42;
-        Func<SampleDto, Task<ErrorOr<int>>> success = Substitute.For<Func<SampleDto, Task<ErrorOr<int>>>>();
-        success(dto).Returns(Task.FromResult(expected));
+        Func<SampleDto, CancellationToken, Task<ErrorOr<int>>> success =
+            Substitute.For<Func<SampleDto, CancellationToken, Task<ErrorOr<int>>>>();
+        success(dto, cts.Token).Returns(Task.FromResult(expected));
 
-        ErrorOr<int> ok = await dto.ProtectAsync(success);
+        ErrorOr<int> ok = await dto.ProtectAsync(success, cancellationToken: cts.Token);
         ok.IsError.ShouldBeFalse();
         ok.Value.ShouldBe(42);
+        // The object and the supplied CancellationToken are both forwarded to the function.
         // The returned Task is discarded: this call only records the "received" assertion.
-        _ = success.Received(1).Invoke(dto);
+        _ = success.Received(1).Invoke(dto, cts.Token);
 
         // Failure path: the (synchronously) throwing delegate is caught around the await.
         InvalidOperationException boom = new("async-boom");
-        ErrorOr<int> failed = await dto.ProtectAsync<SampleDto, int>(_ => throw boom, ErrorType.NotFound);
+        ErrorOr<int> failed = await dto.ProtectAsync<SampleDto, int>((_, _) => throw boom, ErrorType.NotFound);
         failed.IsError.ShouldBeTrue();
         failed.FirstError.Type.ShouldBe(ErrorType.NotFound);
         failed.FirstError.Description.ShouldBe("async-boom");
@@ -112,25 +117,30 @@ public class ObjectExtensionsTests
     }
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, Task}, ErrorType, bool)"/>.
+    /// Tests <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, CancellationToken)"/>:
+    /// the side-effecting action runs, the supplied <see cref="CancellationToken"/> is forwarded to it, and
+    /// the ORIGINAL object is returned on success; a thrown exception becomes an error.
     /// </summary>
     [Fact]
     public async Task ProtectDoAsyncTest()
     {
         SampleDto dto = new() { Id = 1, Name = "x" };
+        using CancellationTokenSource cts = new();
 
         // Success.
-        Func<SampleDto, Task> action = Substitute.For<Func<SampleDto, Task>>();
-        action(dto).Returns(Task.CompletedTask);
-        ErrorOr<SampleDto> ok = await dto.ProtectDoAsync(action);
+        Func<SampleDto, CancellationToken, Task> action =
+            Substitute.For<Func<SampleDto, CancellationToken, Task>>();
+        action(dto, cts.Token).Returns(Task.CompletedTask);
+        ErrorOr<SampleDto> ok = await dto.ProtectDoAsync(action, cancellationToken: cts.Token);
         ok.IsError.ShouldBeFalse();
         ok.Value.ShouldBeSameAs(dto);
+        // The object and the supplied CancellationToken are both forwarded to the action.
         // The returned Task is discarded: this call only records the "received" assertion.
-        _ = action.Received(1).Invoke(dto);
+        _ = action.Received(1).Invoke(dto, cts.Token);
 
         // Failure.
         InvalidOperationException boom = new("do-async-boom");
-        ErrorOr<SampleDto> failed = await dto.ProtectDoAsync(_ => throw boom, ErrorType.Unauthorized);
+        ErrorOr<SampleDto> failed = await dto.ProtectDoAsync((_, _) => throw boom, ErrorType.Unauthorized);
         failed.IsError.ShouldBeTrue();
         failed.FirstError.Type.ShouldBe(ErrorType.Unauthorized);
         failed.FirstError.Description.ShouldBe("do-async-boom");

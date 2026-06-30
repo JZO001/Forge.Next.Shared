@@ -355,14 +355,16 @@ if (failed.IsError)
 }
 ```
 
-### `ProtectAsync<T, TResult>(Func<T, Task<ErrorOr<TResult>>> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false) : Task<ErrorOr<TResult>>`
+### `ProtectAsync<T, TResult>(Func<T, CancellationToken, Task<ErrorOr<TResult>>> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default) : Task<ErrorOr<TResult>>`
 
-Asynchronous version of `Protect`. `configureAwait` is forwarded to the internal `ConfigureAwait` call.
+Asynchronous version of `Protect`. The `func` receives the supplied `cancellationToken`, which lets the
+awaited operation observe cancellation; `configureAwait` is forwarded to the internal `ConfigureAwait` call.
 
 ```csharp
 ErrorOr<User> result = await userId.ProtectAsync(
-    func: id => repository.GetAsync(id),     // returns Task<ErrorOr<User>>
-    errorType: ErrorType.NotFound);
+    func: (id, ct) => repository.GetAsync(id, ct),   // returns Task<ErrorOr<User>>
+    errorType: ErrorType.NotFound,
+    cancellationToken: token);
 ```
 
 ### `ProtectDo<T>(Action<T> action, ErrorType errorType = ErrorType.Unexpected) : ErrorOr<T>`
@@ -376,10 +378,15 @@ ErrorOr<Order> result = order.ProtectDo(o => o.Validate());
 // On failure: result.IsError is true.
 ```
 
-### `ProtectDoAsync<T>(Func<T, Task> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false) : Task<ErrorOr<T>>`
+### `ProtectDoAsync<T>(Func<T, CancellationToken, Task> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default) : Task<ErrorOr<T>>`
+
+Asynchronous version of `ProtectDo`. The `func` receives the supplied `cancellationToken` so the
+side-effecting operation can observe cancellation. Returns the **original object** on success.
 
 ```csharp
-ErrorOr<Document> result = await document.ProtectDoAsync(d => storage.SaveAsync(d));
+ErrorOr<Document> result = await document.ProtectDoAsync(
+    (d, ct) => storage.SaveAsync(d, ct),
+    cancellationToken: token);
 ```
 
 ### Hashing helpers
