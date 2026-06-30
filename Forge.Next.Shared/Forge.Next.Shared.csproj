@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net48;net8.0;net9.0;net10.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>12.0</LangVersion>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>Forge.Next.Shared.xml</DocumentationFile>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<Title>Forge.Next.Shared: Forge Patterns and Practices.</Title>
+		<Product>Forge.Next.Shared: Forge Patterns and Practices.</Product>
+		<PackageId>Forge.Next.Shared</PackageId>
+		<AssemblyVersion>3.0.0.0</AssemblyVersion>
+		<Version>$(AssemblyVersion)</Version>
+		<FileVersion>$(AssemblyVersion)</FileVersion>
+		<Authors>Zoltan Juhasz</Authors>
+		<PackageIcon>logo.png</PackageIcon>
+		<PackageTags>Forge,Shared,Next</PackageTags>
+		<Description>Forge Patterns and Practices</Description>
+		<PackageOutputPath>../artifacts/</PackageOutputPath>
+		<PackageProjectUrl>https://github.com/JZO001/Forge.Next.Shared</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
+		<licenses>https://github.com/JZO001/Forge.Next.Shared#Apache-2.0-1-ov-file</licenses>
+		<RepositoryUrl>https://github.com/JZO001/Forge.Next.Shared</RepositoryUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<ProjectGuid>{122158B5-1946-4563-AD72-074AD71B6053}</ProjectGuid>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="../logo.png" Pack="true" Visible="false" PackagePath="" />
+		<None Include="../README.md" Pack="true" PackagePath="" />
+		<None Remove="Forge.Next.Shared.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="ErrorOr" Version="2.1.1" />
+	</ItemGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+		<PackageReference Include="System.Text.Json" Version="8.0.6" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net10.0'">
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Properties\" />
+	</ItemGroup>
+
+</Project>

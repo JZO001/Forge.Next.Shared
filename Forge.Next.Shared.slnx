@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/.Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="LICENSE" />
+    <File Path="logo.png" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/.Solution Items/prompts/">
+    <File Path="prompts/auto_doc.txt" />
+    <File Path="prompts/init_tests.txt" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Forge.Next.Shared.Tests/Forge.Next.Shared.Tests.csproj" Id="4dce863a-64f3-44b0-9fd1-f38d058e8948" />
+  </Folder>
+  <Project Path="Forge.Next.Shared/Forge.Next.Shared.csproj" />
+</Solution>

@@ -1,0 +1,718 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Forge.Next.Shared</name>
+    </assembly>
+    <members>
+        <member name="T:Forge.Next.Shared.BoolExtensions">
+            <summary>
+            Fluent extension methods for <see cref="T:System.Boolean"/> that branch on the value of a condition,
+            allowing <see langword="if"/>/<see langword="else"/> logic to be expressed as a single expression.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrue``1(System.Boolean,System.Func{``0},System.Func{``0})">
+            <summary>
+            Invokes <paramref name="onTrue"/> when <paramref name="condition"/> is <see langword="true"/>;
+            otherwise invokes <paramref name="onFalse"/> when supplied, or returns the default value of
+            <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onTrue">The function invoked when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional function invoked when <paramref name="condition"/> is <see langword="false"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>The value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="false"/> and no <paramref name="onFalse"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrue``2(System.Boolean,``0,System.Func{``0,``1},System.Func{``0,``1})">
+            <summary>
+            Invokes <paramref name="onTrue"/> with <paramref name="value"/> when <paramref name="condition"/> is
+            <see langword="true"/>; otherwise invokes <paramref name="onFalse"/> with <paramref name="value"/> when
+            supplied, or returns the default value of <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected callback.</typeparam>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the invoked callback.</param>
+            <param name="onTrue">The function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>The value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="false"/> and no <paramref name="onFalse"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrueAsync``1(System.Boolean,System.Func{System.Threading.Tasks.Task{``0}},System.Func{System.Threading.Tasks.Task{``0}})">
+            <summary>
+            Asynchronously invokes <paramref name="onTrue"/> when <paramref name="condition"/> is <see langword="true"/>;
+            otherwise invokes <paramref name="onFalse"/> when supplied, or returns the default value of
+            <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onTrue">The asynchronous function invoked when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional asynchronous function invoked when <paramref name="condition"/> is <see langword="false"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>A task that produces the value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="false"/> and no <paramref name="onFalse"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrueAsync``2(System.Boolean,``0,System.Func{``0,System.Threading.Tasks.Task{``1}},System.Func{``0,System.Threading.Tasks.Task{``1}})">
+            <summary>
+            Asynchronously invokes <paramref name="onTrue"/> with <paramref name="value"/> when
+            <paramref name="condition"/> is <see langword="true"/>; otherwise invokes <paramref name="onFalse"/> with
+            <paramref name="value"/> when supplied, or returns the default value of <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected callback.</typeparam>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the invoked callback.</param>
+            <param name="onTrue">The asynchronous function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional asynchronous function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>A task that produces the value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="false"/> and no <paramref name="onFalse"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrueDo(System.Boolean,System.Action,System.Action)">
+            <summary>
+            Executes <paramref name="onTrue"/> when <paramref name="condition"/> is <see langword="true"/>;
+            otherwise executes <paramref name="onFalse"/> when supplied. No action is taken when
+            <paramref name="condition"/> is <see langword="false"/> and <paramref name="onFalse"/> is <see langword="null"/>.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onTrue">The action executed when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional action executed when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <returns>The original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrueDo``1(System.Boolean,``0,System.Action{``0},System.Action{``0})">
+            <summary>
+            Executes <paramref name="onTrue"/> with <paramref name="value"/> when <paramref name="condition"/> is
+            <see langword="true"/>; otherwise executes <paramref name="onFalse"/> with <paramref name="value"/> when
+            supplied. No action is taken when <paramref name="condition"/> is <see langword="false"/> and
+            <paramref name="onFalse"/> is <see langword="null"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected action.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the executed action.</param>
+            <param name="onTrue">The action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <returns>The original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrueDoAsync(System.Boolean,System.Func{System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Asynchronously executes <paramref name="onTrue"/> when <paramref name="condition"/> is <see langword="true"/>;
+            otherwise executes <paramref name="onFalse"/> when supplied. No action is taken when
+            <paramref name="condition"/> is <see langword="false"/> and <paramref name="onFalse"/> is <see langword="null"/>.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onTrue">The asynchronous action executed when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional asynchronous action executed when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <returns>A task that produces the original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfTrueDoAsync``1(System.Boolean,``0,System.Func{``0,System.Threading.Tasks.Task},System.Func{``0,System.Threading.Tasks.Task})">
+            <summary>
+            Asynchronously executes <paramref name="onTrue"/> with <paramref name="value"/> when
+            <paramref name="condition"/> is <see langword="true"/>; otherwise executes <paramref name="onFalse"/> with
+            <paramref name="value"/> when supplied. No action is taken when <paramref name="condition"/> is
+            <see langword="false"/> and <paramref name="onFalse"/> is <see langword="null"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected action.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the executed action.</param>
+            <param name="onTrue">The asynchronous action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <param name="onFalse">The optional asynchronous action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <returns>A task that produces the original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalse``1(System.Boolean,System.Func{``0},System.Func{``0})">
+            <summary>
+            Invokes <paramref name="onFalse"/> when <paramref name="condition"/> is <see langword="false"/>;
+            otherwise invokes <paramref name="onTrue"/> when supplied, or returns the default value of
+            <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onFalse">The function invoked when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional function invoked when <paramref name="condition"/> is <see langword="true"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>The value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="true"/> and no <paramref name="onTrue"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalse``2(System.Boolean,``0,System.Func{``0,``1},System.Func{``0,``1})">
+            <summary>
+            Invokes <paramref name="onFalse"/> with <paramref name="value"/> when <paramref name="condition"/> is
+            <see langword="false"/>; otherwise invokes <paramref name="onTrue"/> with <paramref name="value"/> when
+            supplied, or returns the default value of <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected callback.</typeparam>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the invoked callback.</param>
+            <param name="onFalse">The function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>The value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="true"/> and no <paramref name="onTrue"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalseAsync``1(System.Boolean,System.Func{System.Threading.Tasks.Task{``0}},System.Func{System.Threading.Tasks.Task{``0}})">
+            <summary>
+            Asynchronously invokes <paramref name="onFalse"/> when <paramref name="condition"/> is <see langword="false"/>;
+            otherwise invokes <paramref name="onTrue"/> when supplied, or returns the default value of
+            <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onFalse">The asynchronous function invoked when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional asynchronous function invoked when <paramref name="condition"/> is <see langword="true"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>A task that produces the value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="true"/> and no <paramref name="onTrue"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalseAsync``2(System.Boolean,``0,System.Func{``0,System.Threading.Tasks.Task{``1}},System.Func{``0,System.Threading.Tasks.Task{``1}})">
+            <summary>
+            Asynchronously invokes <paramref name="onFalse"/> with <paramref name="value"/> when
+            <paramref name="condition"/> is <see langword="false"/>; otherwise invokes <paramref name="onTrue"/> with
+            <paramref name="value"/> when supplied, or returns the default value of <typeparamref name="TNextValue"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected callback.</typeparam>
+            <typeparam name="TNextValue">The type of the value produced by the selected callback.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the invoked callback.</param>
+            <param name="onFalse">The asynchronous function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional asynchronous function invoked with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>. When <see langword="null"/>, the default value of <typeparamref name="TNextValue"/> is returned instead.</param>
+            <returns>A task that produces the value returned by the invoked callback, or <see langword="default"/> when <paramref name="condition"/> is <see langword="true"/> and no <paramref name="onTrue"/> callback is supplied.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalseDo(System.Boolean,System.Action,System.Action)">
+            <summary>
+            Executes <paramref name="onFalse"/> when <paramref name="condition"/> is <see langword="false"/>;
+            otherwise executes <paramref name="onTrue"/> when supplied. No action is taken when
+            <paramref name="condition"/> is <see langword="true"/> and <paramref name="onTrue"/> is <see langword="null"/>.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onFalse">The action executed when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional action executed when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <returns>The original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalseDo``1(System.Boolean,``0,System.Action{``0},System.Action{``0})">
+            <summary>
+            Executes <paramref name="onFalse"/> with <paramref name="value"/> when <paramref name="condition"/> is
+            <see langword="false"/>; otherwise executes <paramref name="onTrue"/> with <paramref name="value"/> when
+            supplied. No action is taken when <paramref name="condition"/> is <see langword="true"/> and
+            <paramref name="onTrue"/> is <see langword="null"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected action.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the executed action.</param>
+            <param name="onFalse">The action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <returns>The original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalseDoAsync(System.Boolean,System.Func{System.Threading.Tasks.Task},System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Asynchronously executes <paramref name="onFalse"/> when <paramref name="condition"/> is <see langword="false"/>;
+            otherwise executes <paramref name="onTrue"/> when supplied. No action is taken when
+            <paramref name="condition"/> is <see langword="true"/> and <paramref name="onTrue"/> is <see langword="null"/>.
+            </summary>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="onFalse">The asynchronous action executed when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional asynchronous action executed when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <returns>A task that produces the original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.BoolExtensions.IfFalseDoAsync``1(System.Boolean,``0,System.Func{``0,System.Threading.Tasks.Task},System.Func{``0,System.Threading.Tasks.Task})">
+            <summary>
+            Asynchronously executes <paramref name="onFalse"/> with <paramref name="value"/> when
+            <paramref name="condition"/> is <see langword="false"/>; otherwise executes <paramref name="onTrue"/> with
+            <paramref name="value"/> when supplied. No action is taken when <paramref name="condition"/> is
+            <see langword="true"/> and <paramref name="onTrue"/> is <see langword="null"/>.
+            </summary>
+            <typeparam name="TValue">The type of the value passed to the selected action.</typeparam>
+            <param name="condition">The condition to evaluate.</param>
+            <param name="value">The value passed to the executed action.</param>
+            <param name="onFalse">The asynchronous action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="false"/>.</param>
+            <param name="onTrue">The optional asynchronous action executed with <paramref name="value"/> when <paramref name="condition"/> is <see langword="true"/>.</param>
+            <returns>A task that produces the original <paramref name="condition"/>, enabling further chaining.</returns>
+        </member>
+        <member name="T:Forge.Next.Shared.Consts">
+            <summary>
+            Constants class
+            </summary>
+        </member>
+        <member name="F:Forge.Next.Shared.Consts.WINDOWS_FORMS_CONTROL">
+            <summary>The windows form control</summary>
+        </member>
+        <member name="F:Forge.Next.Shared.Consts.WINDOWS_DEPENDENCY_OBJECT">
+            <summary>The windows dependency object</summary>
+        </member>
+        <member name="T:Forge.Next.Shared.Event">
+            <summary>
+            Helpers for raising multicast delegates (events) in a fault-tolerant way.
+            <para>
+            Each subscriber in the delegate's invocation list is invoked independently: a handler that throws does
+            not stop the remaining handlers, and its exception is captured into the result rather than propagated.
+            Invocations can optionally be marshalled onto a WinForms/WPF UI thread (see
+            <see cref="T:Forge.Next.Shared.UI.UIExtensions"/>), and an optional <see cref="T:Microsoft.Extensions.Logging.ILogger"/> traces every invocation.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.Event.Fire(System.Delegate,System.Collections.Generic.IEnumerable{System.Object},System.Boolean,Microsoft.Extensions.Logging.ILogger)">
+            <summary>
+            Invokes every handler of a multicast delegate one by one, collecting each handler's return value — or
+            the exception it threw — into the returned collection. A failing handler never prevents the remaining
+            handlers from running.
+            </summary>
+            <param name="event">
+            The (multicast) delegate to invoke. When <see langword="null"/>, an empty collection is returned.
+            </param>
+            <param name="parameters">The arguments passed to each handler.</param>
+            <param name="controlInvoke">
+            When <see langword="true"/>, a handler whose target is a WinForms control or WPF dependency object is
+            marshalled onto that object's UI thread; otherwise every handler is invoked directly on the calling thread.
+            </param>
+            <param name="logger">
+            An optional logger. When supplied, a debug entry is written before and after each invocation and an
+            error entry is written when a handler throws.
+            </param>
+            <returns>
+            A read-only collection holding, in handler order, each handler's return value (which may be
+            <see langword="null"/>) or, when a handler threw, the <see cref="T:System.Exception"/> that was caught.
+            </returns>
+        </member>
+        <member name="M:Forge.Next.Shared.Event.InvokeHandler(System.Delegate,System.Collections.Generic.IEnumerable{System.Object},System.Boolean)">
+            <summary>
+            Invokes a single handler, optionally marshalling the call onto the target's UI thread.
+            </summary>
+            <param name="del">The handler to invoke.</param>
+            <param name="parameters">The arguments passed to the handler.</param>
+            <param name="controlInvoke">Whether UI targets should be invoked on their UI thread.</param>
+            <returns>The handler's return value, or <see langword="null"/> for a void handler.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.Event.GetTargetName(System.Delegate)">
+            <summary>
+            Resolves a human-readable name for a handler's target: the instance type's full name when the handler
+            is an instance method, or the declaring type's full name when it is static.
+            </summary>
+            <param name="del">The handler whose target name is requested.</param>
+            <returns>The resolved full type name, or <see cref="F:System.String.Empty"/> when it cannot be determined.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.Event.LogBeforeInvoke(Microsoft.Extensions.Logging.ILogger,System.Delegate,System.Boolean)">
+            <summary>Writes the "before invoke" debug entry when debug logging is enabled.</summary>
+            <param name="logger">The optional logger.</param>
+            <param name="del">The handler about to be invoked.</param>
+            <param name="controlInvoke">Whether the invocation marshals onto a UI thread.</param>
+        </member>
+        <member name="M:Forge.Next.Shared.Event.LogAfterInvoke(Microsoft.Extensions.Logging.ILogger,System.Delegate,System.Boolean)">
+            <summary>Writes the "after invoke" debug entry when debug logging is enabled.</summary>
+            <param name="logger">The optional logger.</param>
+            <param name="del">The handler that was invoked.</param>
+            <param name="controlInvoke">Whether the invocation marshalled onto a UI thread.</param>
+        </member>
+        <member name="M:Forge.Next.Shared.Event.LogInvokeError(Microsoft.Extensions.Logging.ILogger,System.Delegate,System.Boolean,System.Exception)">
+            <summary>Writes the error entry for a failed handler when error logging is enabled.</summary>
+            <param name="logger">The optional logger.</param>
+            <param name="del">The handler that threw.</param>
+            <param name="controlInvoke">Whether the invocation marshalled onto a UI thread.</param>
+            <param name="e">The exception thrown by the handler.</param>
+        </member>
+        <member name="T:Forge.Next.Shared.ExceptionErrorOrExtensions">
+            <summary>
+            Extension methods that convert an <see cref="T:System.Exception"/> (together with its inner-exception chain)
+            into <see cref="T:ErrorOr.Error"/> values consumable by the <c>ErrorOr</c> library.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.ExceptionErrorOrExtensions.ToErrorOrError``1(System.Exception,ErrorOr.ErrorType)">
+            <summary>
+            Converts <paramref name="ex"/> and its inner-exception chain into a failed
+            <see cref="T:ErrorOr.ErrorOr`1"/> carrying one <see cref="T:ErrorOr.Error"/> per exception.
+            </summary>
+            <typeparam name="TValue">The value type of the resulting <see cref="T:ErrorOr.ErrorOr`1"/>.</typeparam>
+            <param name="ex">The exception to convert.</param>
+            <param name="expectedErrorType">The <see cref="T:ErrorOr.ErrorType"/> applied to every produced error.</param>
+            <returns>A failed <see cref="T:ErrorOr.ErrorOr`1"/> containing the errors derived from the exception chain.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.ExceptionErrorOrExtensions.ToErrorOrError(System.Exception,ErrorOr.ErrorType)">
+            <summary>
+            Walks <paramref name="ex"/> and its <see cref="P:System.Exception.InnerException"/> chain, producing one
+            <see cref="T:ErrorOr.Error"/> per exception. Each error's description is the exception message, and its metadata
+            captures the exception's assembly-qualified type name, message, and stack trace.
+            </summary>
+            <param name="ex">The exception to convert.</param>
+            <param name="expectedErrorType">
+            The <see cref="T:ErrorOr.ErrorType"/> that selects which <see cref="T:ErrorOr.Error"/> factory is used for every exception
+            in the chain. Unrecognized values fall back to <see cref="M:ErrorOr.Error.Unexpected(System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.Object})"/>.
+            </param>
+            <returns>A list of errors ordered from the outermost exception to the innermost.</returns>
+        </member>
+        <member name="T:Forge.Next.Shared.IEnumerableExtensions">
+            <summary>
+            Extension methods for <see cref="T:System.Collections.IEnumerable"/> and <see cref="T:System.Collections.Generic.IEnumerable`1"/>.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.IEnumerableExtensions.ForEach``1(System.Collections.Generic.IEnumerable{``0},System.Action{``0})">
+            <summary>
+            ForEach extension method for IEnumerable. This is not a LINQ method, but it is a convenient way to perform an action on each item in a collection.
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="items">The items.</param>
+            <param name="action">The action.</param>
+        </member>
+        <member name="M:Forge.Next.Shared.IEnumerableExtensions.IsDeepEqual(System.Collections.IEnumerable,System.Collections.IEnumerable)">
+            <summary>
+            Determines whether two sequences are equal by comparing their elements in order,
+            recursing into nested <see cref="T:System.Collections.IEnumerable"/> elements (deep comparison).
+            Strings are treated as scalar values rather than character sequences.
+            </summary>
+            <param name="first">The first sequence to compare. May be <see langword="null"/>.</param>
+            <param name="second">The second sequence to compare. May be <see langword="null"/>.</param>
+            <returns>
+            <see langword="true"/> if both sequences are <see langword="null"/>, the same reference,
+            or contain deeply equal elements in the same order; otherwise <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="M:Forge.Next.Shared.IEnumerableExtensions.IsDeepEqual``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Determines whether two sequences are equal by comparing their elements in order,
+            recursing into nested <see cref="T:System.Collections.IEnumerable"/> elements (deep comparison).
+            Non-enumerable elements are compared with <see cref="P:System.Collections.Generic.EqualityComparer`1.Default"/>;
+            strings are treated as scalar values rather than character sequences.
+            </summary>
+            <typeparam name="T">The element type.</typeparam>
+            <param name="first">The first sequence to compare. May be <see langword="null"/>.</param>
+            <param name="second">The second sequence to compare. May be <see langword="null"/>.</param>
+            <returns>
+            <see langword="true"/> if both sequences are <see langword="null"/>, the same reference,
+            or contain deeply equal elements in the same order; otherwise <see langword="false"/>.
+            </returns>
+        </member>
+        <member name="T:Forge.Next.Shared.InitializationException">
+            <summary>
+            Exception for initialization fail scenarios
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.InitializationException.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Forge.Next.Shared.InitializationException"/> class.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.InitializationException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Forge.Next.Shared.InitializationException"/> class.
+            </summary>
+            <param name="message">The message.</param>
+        </member>
+        <member name="M:Forge.Next.Shared.InitializationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Forge.Next.Shared.InitializationException"/> class.
+            </summary>
+            <param name="message">The message.</param>
+            <param name="innerException">The innerException.</param>
+        </member>
+        <member name="T:Forge.Next.Shared.IO.PathExtensions">
+            <summary>
+            Helper methods for working with file-system paths.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.IO.PathExtensions.PerformFolderSecurityCheck(System.String)">
+            <summary>
+            Verifies that the specified folder is usable by performing a write probe: it creates the directory when
+            it does not yet exist, then creates and deletes a uniquely named temporary file inside it.
+            </summary>
+            <param name="path">The folder path to check. A <see langword="null"/> value yields a validation error.</param>
+            <returns>
+            A successful <see cref="T:ErrorOr.ErrorOr`1"/> of <see cref="T:ErrorOr.Success"/> when the directory exists (or could
+            be created) and a file could be created and deleted within it. Otherwise an error result: a
+            <see cref="F:ErrorOr.ErrorType.Validation"/> error when <paramref name="path"/> is <see langword="null"/>, or the
+            error(s) converted from the caught exception when a file-system operation fails (for example due to
+            missing permissions or an invalid path).
+            </returns>
+        </member>
+        <member name="T:Forge.Next.Shared.ISetExtensions">
+            <summary>
+            Extension methods for <see cref="T:System.Collections.Generic.ISet`1"/>.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.ISetExtensions.AddRange``1(System.Collections.Generic.ISet{``0},System.Collections.Generic.IEnumerable{``0})">
+            <summary>
+            Adds every element of <paramref name="collection"/> to <paramref name="set"/>. Elements already present
+            are ignored (normal set semantics), and a <see langword="null"/> <paramref name="collection"/> is treated
+            as empty (no-op).
+            </summary>
+            <typeparam name="T">The element type of the set.</typeparam>
+            <param name="set">The set to add the elements to.</param>
+            <param name="collection">The elements to add; may be <see langword="null"/> (treated as no elements).</param>
+            <exception cref="T:System.ArgumentNullException"><paramref name="set"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="T:Forge.Next.Shared.Logging.LogUtils">
+            <summary>
+            Diagnostic logging helpers that dump current process, <see cref="T:System.AppDomain"/> and loaded-assembly
+            information through an <see cref="T:Microsoft.Extensions.Logging.ILogger"/>, and that can optionally subscribe to AppDomain events
+            (assembly loads and unhandled exceptions).
+            <para>
+            All informational output is written at <c>LogLevel.Information</c> (the unhandled-exception trace
+            uses <c>LogLevel.Critical</c>), and every method is a no-op when that level is not enabled. Call
+            <see cref="M:Forge.Next.Shared.Logging.LogUtils.ConfigureLogging(Microsoft.Extensions.Logging.ILoggerFactory)"/> first; until then a no-op logger is used.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Forge.Next.Shared.Logging.LogUtils.IsSubscribedForAssemblyLoad">
+            <summary>
+            Gets a value indicating whether this helper is currently subscribed to the
+            <see cref="E:System.AppDomain.AssemblyLoad"/> event. Controlled by <see cref="M:Forge.Next.Shared.Logging.LogUtils.TraceAssemblyLoads(System.Boolean)"/>.
+            </summary>
+            <value><see langword="true"/> while assembly-load tracing is active; otherwise <see langword="false"/>.</value>
+        </member>
+        <member name="P:Forge.Next.Shared.Logging.LogUtils.IsSubscribedForAppDomainUnhandledException">
+            <summary>
+            Gets or sets a value indicating whether this helper is subscribed to the
+            <see cref="E:System.AppDomain.UnhandledException"/> event. Setting it to <see langword="true"/> subscribes a
+            handler that logs unhandled exceptions at <c>LogLevel.Critical</c>; setting it to
+            <see langword="false"/> unsubscribes. The operation is idempotent and thread-safe.
+            </summary>
+            <value><see langword="true"/> while the unhandled-exception handler is subscribed; otherwise <see langword="false"/>.</value>
+        </member>
+        <member name="M:Forge.Next.Shared.Logging.LogUtils.ConfigureLogging(Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            Sets the <see cref="T:Microsoft.Extensions.Logging.ILogger"/> used by every logging method. The logger is created from
+            <paramref name="loggerFactory"/> with the category name <c>"LogUtils"</c>. When
+            <paramref name="loggerFactory"/> is <see langword="null"/>, logging falls back to a no-op logger.
+            </summary>
+            <param name="loggerFactory">The factory used to create the logger, or <see langword="null"/> to disable logging.</param>
+        </member>
+        <member name="M:Forge.Next.Shared.Logging.LogUtils.TraceAssemblyLoads(System.Boolean)">
+            <summary>
+            Starts or stops tracing assembly loads by subscribing to / unsubscribing from the
+            <see cref="E:System.AppDomain.AssemblyLoad"/> event. While active, information about each newly loaded assembly
+            is logged. Updates <see cref="P:Forge.Next.Shared.Logging.LogUtils.IsSubscribedForAssemblyLoad"/> accordingly; thread-safe.
+            </summary>
+            <param name="state"><see langword="true"/> to start tracing assembly loads; <see langword="false"/> to stop.</param>
+        </member>
+        <member name="M:Forge.Next.Shared.Logging.LogUtils.LogProcessInfo">
+            <summary>
+            Logs information about the current process — id, base priority, name, machine, session, start time and
+            (when available) start-info details — at <c>LogLevel.Information</c>. Does nothing when
+            information logging is disabled.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.Logging.LogUtils.LogDomainInfo">
+            <summary>
+            Logs information about the current <see cref="T:System.AppDomain"/> — id, directories, friendly name, trust flags
+            and (on .NET Framework targets) setup information — at <c>LogLevel.Information</c>. Does nothing
+            when information logging is disabled.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.Logging.LogUtils.LogLoadedAssemblies">
+            <summary>
+            Logs every assembly currently loaded into the <see cref="T:System.AppDomain"/> together with its properties
+            (full name, location, runtime version, ...) at <c>LogLevel.Information</c>. Does nothing when
+            information logging is disabled.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.Logging.LogUtils.LogAll">
+            <summary>
+            One-call diagnostic dump: logs process, AppDomain and loaded-assembly information, then starts tracing
+            assembly loads (<see cref="M:Forge.Next.Shared.Logging.LogUtils.TraceAssemblyLoads(System.Boolean)"/>) and subscribes to the unhandled-exception event
+            (<see cref="P:Forge.Next.Shared.Logging.LogUtils.IsSubscribedForAppDomainUnhandledException"/>).
+            </summary>
+        </member>
+        <member name="T:Forge.Next.Shared.ObjectExtensions">
+            <summary>
+            Extension methods for arbitrary objects: exception-safe execution wrappers that return an
+            <see cref="T:ErrorOr.ErrorOr`1"/> instead of throwing, and helpers that hash an object based on its
+            JSON representation.
+            </summary>
+        </member>
+        <member name="P:Forge.Next.Shared.ObjectExtensions.DefaultJsonSerializerOptions">
+            <summary>
+            The <see cref="T:System.Text.Json.JsonSerializerOptions"/> used when serializing objects to JSON prior to hashing.
+            Fields are included and reference loops are preserved.
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.ProtectAsync``2(``0,System.Func{``0,System.Threading.Tasks.Task{ErrorOr.ErrorOr{``1}}},ErrorOr.ErrorType,System.Boolean)">
+            <summary>
+            Asynchronously invokes <paramref name="func"/> on <paramref name="object"/>, catching any thrown
+            exception and converting it into an <see cref="T:ErrorOr.ErrorOr`1"/> error.
+            </summary>
+            <typeparam name="T">The type of the source object.</typeparam>
+            <typeparam name="TResult">The type of the successful result.</typeparam>
+            <param name="object">The object the function operates on.</param>
+            <param name="func">The asynchronous function to execute.</param>
+            <param name="errorType">The <see cref="T:ErrorOr.ErrorType"/> assigned to the error when an exception is caught.</param>
+            <param name="configureAwait">The value forwarded to <c>ConfigureAwait</c> when awaiting <paramref name="func"/>.</param>
+            <returns>The result produced by <paramref name="func"/>, or an error describing the caught exception.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.Protect``2(``0,System.Func{``0,ErrorOr.ErrorOr{``1}},ErrorOr.ErrorType)">
+            <summary>
+            Invokes <paramref name="func"/> on <paramref name="object"/>, catching any thrown exception and
+            converting it into an <see cref="T:ErrorOr.ErrorOr`1"/> error.
+            </summary>
+            <typeparam name="T">The type of the source object.</typeparam>
+            <typeparam name="TResult">The type of the successful result.</typeparam>
+            <param name="object">The object the function operates on.</param>
+            <param name="func">The function to execute.</param>
+            <param name="errorType">The <see cref="T:ErrorOr.ErrorType"/> assigned to the error when an exception is caught.</param>
+            <returns>The result produced by <paramref name="func"/>, or an error describing the caught exception.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.ProtectDoAsync``1(``0,System.Func{``0,System.Threading.Tasks.Task},ErrorOr.ErrorType,System.Boolean)">
+            <summary>
+            Asynchronously runs <paramref name="func"/> on <paramref name="object"/> for its side effects,
+            returning the object itself on success or an <see cref="T:ErrorOr.ErrorOr`1"/> error describing any thrown exception.
+            </summary>
+            <typeparam name="T">The type of the source object.</typeparam>
+            <param name="object">The object the function operates on and that is returned on success.</param>
+            <param name="func">The asynchronous action to execute.</param>
+            <param name="errorType">The <see cref="T:ErrorOr.ErrorType"/> assigned to the error when an exception is caught.</param>
+            <param name="configureAwait">The value forwarded to <c>ConfigureAwait</c> when awaiting <paramref name="func"/>.</param>
+            <returns><paramref name="object"/> when <paramref name="func"/> completes, or an error describing the caught exception.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.ProtectDo``1(``0,System.Action{``0},ErrorOr.ErrorType)">
+            <summary>
+            Runs <paramref name="action"/> on <paramref name="object"/> for its side effects, returning the object
+            itself on success or an <see cref="T:ErrorOr.ErrorOr`1"/> error describing any thrown exception.
+            </summary>
+            <typeparam name="T">The type of the source object.</typeparam>
+            <param name="object">The object the action operates on and that is returned on success.</param>
+            <param name="action">The action to execute.</param>
+            <param name="errorType">The <see cref="T:ErrorOr.ErrorType"/> assigned to the error when an exception is caught.</param>
+            <returns><paramref name="object"/> when <paramref name="action"/> completes, or an error describing the caught exception.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA256AsInt(System.Object)">
+            <summary>
+            Computes the SHA-256 hash of the object's JSON representation and folds it into a 32-bit integer.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>An integer derived from the SHA-256 hash of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA256(System.Object)">
+            <summary>
+            Computes the SHA-256 hash of the object's JSON representation.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>The SHA-256 hash bytes of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA384AsInt(System.Object)">
+            <summary>
+            Computes the SHA-384 hash of the object's JSON representation and folds it into a 32-bit integer.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>An integer derived from the SHA-384 hash of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA384(System.Object)">
+            <summary>
+            Computes the SHA-384 hash of the object's JSON representation.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>The SHA-384 hash bytes of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA512AsInt(System.Object)">
+            <summary>
+            Computes the SHA-512 hash of the object's JSON representation and folds it into a 32-bit integer.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>An integer derived from the SHA-512 hash of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA512(System.Object)">
+            <summary>
+            Computes the SHA-512 hash of the object's JSON representation.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>The SHA-512 hash bytes of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA3_256_AsInt(System.Object)">
+            <summary>
+            Computes the SHA3-256 hash of the object's JSON representation and folds it into a 32-bit integer.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>An integer derived from the SHA3-256 hash of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.PlatformNotSupportedException">SHA3-256 is not supported on the current platform.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA3_256(System.Object)">
+            <summary>
+            Computes the SHA3-256 hash of the object's JSON representation.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>The SHA3-256 hash bytes of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.PlatformNotSupportedException">SHA3-256 is not supported on the current platform.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA3_384_AsInt(System.Object)">
+            <summary>
+            Computes the SHA3-384 hash of the object's JSON representation and folds it into a 32-bit integer.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>An integer derived from the SHA3-384 hash of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.PlatformNotSupportedException">SHA3-384 is not supported on the current platform.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA3_384(System.Object)">
+            <summary>
+            Computes the SHA3-384 hash of the object's JSON representation.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>The SHA3-384 hash bytes of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.PlatformNotSupportedException">SHA3-384 is not supported on the current platform.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA3_512_AsInt(System.Object)">
+            <summary>
+            Computes the SHA3-512 hash of the object's JSON representation and folds it into a 32-bit integer.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>An integer derived from the SHA3-512 hash of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.PlatformNotSupportedException">SHA3-512 is not supported on the current platform.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHA3_512(System.Object)">
+            <summary>
+            Computes the SHA3-512 hash of the object's JSON representation.
+            </summary>
+            <param name="obj">The object to hash. Must not be <see langword="null"/>.</param>
+            <returns>The SHA3-512 hash bytes of the serialized object.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
+            <exception cref="T:System.PlatformNotSupportedException">SHA3-512 is not supported on the current platform.</exception>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.SerializeObjectToJson(System.Object)">
+            <summary>
+            Serializes <paramref name="obj"/> to JSON using <see cref="P:Forge.Next.Shared.ObjectExtensions.DefaultJsonSerializerOptions"/>.
+            </summary>
+            <param name="obj">The object to serialize.</param>
+            <returns>The JSON representation of <paramref name="obj"/>.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHAFromString(System.String,System.Security.Cryptography.HashAlgorithm)">
+            <summary>
+            Computes the hash of the UTF-8 bytes of <paramref name="input"/> using the supplied algorithm.
+            </summary>
+            <param name="input">The string to hash.</param>
+            <param name="hashAlgorithm">The hash algorithm to use.</param>
+            <returns>The computed hash bytes.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.ObjectExtensions.GetSHAFromStringAsInt(System.String,System.Security.Cryptography.HashAlgorithm)">
+            <summary>
+            Computes the hash of <paramref name="input"/> and folds the resulting bytes into a single 32-bit integer.
+            </summary>
+            <param name="input">The string to hash.</param>
+            <param name="hashAlgorithm">The hash algorithm to use.</param>
+            <returns>An integer derived from the computed hash bytes.</returns>
+        </member>
+        <member name="T:Forge.Next.Shared.UI.UIExtensions">
+            <summary>
+            Helper class for UI reflection operations
+            </summary>
+        </member>
+        <member name="M:Forge.Next.Shared.UI.UIExtensions.IsWinFormsControl(System.Object)">
+            <summary>Determines whether is object win forms control</summary>
+            <param name="obj">The object.</param>
+            <returns>
+              <c>true</c> if is object win forms control; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.UI.UIExtensions.InvokeOnWinFormsControl(System.Object,System.Delegate,System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>Invokes the on win forms control.</summary>
+            <param name="control">The control.</param>
+            <param name="delegate">The delegate.</param>
+            <param name="parameters">The parameters.</param>
+            <returns>
+              <br />
+            </returns>
+        </member>
+        <member name="M:Forge.Next.Shared.UI.UIExtensions.IsWPFDependency(System.Object)">
+            <summary>Determines whether object WPF dependency</summary>
+            <param name="obj">The object.</param>
+            <returns>
+              <c>true</c> if object WPF dependency; otherwise, <c>false</c>.</returns>
+        </member>
+        <member name="M:Forge.Next.Shared.UI.UIExtensions.InvokeOnWPFDependency(System.Object,System.Delegate,System.Collections.Generic.IEnumerable{System.Object})">
+            <summary>Invokes on WPF dependency.</summary>
+            <param name="control">The control.</param>
+            <param name="delegate">The delegate</param>
+            <param name="parameters">The parameters.</param>
+            <returns>object</returns>
+        </member>
+    </members>
+</doc>
