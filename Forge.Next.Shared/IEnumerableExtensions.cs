@@ -30,6 +30,16 @@ public static class IEnumerableExtensions
     }
 
     /// <summary>
+    ///   <para>
+    /// Usage:</para>
+    ///   <para>foreach (var (item, i) in list.WithIndex())<br />{<br />    Console.WriteLine($"{i}: {item}");<br />}</para>
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="source">The source.</param>
+    public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> source) =>
+        source.Select((item, index) => (item, index));
+
+    /// <summary>
     /// Determines whether two sequences are equal by comparing their elements in order,
     /// recursing into nested <see cref="IEnumerable"/> elements (deep comparison).
     /// Strings are treated as scalar values rather than character sequences.
