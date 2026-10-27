@@ -35,17 +35,31 @@ public static class ObjectExtensions
     /// <param name="errorType">The <see cref="ErrorType"/> assigned to the error when an exception is caught.</param>
     /// <param name="configureAwait">The value forwarded to <c>ConfigureAwait</c> when awaiting <paramref name="func"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe while awaiting <paramref name="func"/>.</param>
+    /// <param name="rethrowCancellation">
+    /// When <see langword="true"/>, an <see cref="OperationCanceledException"/> thrown while
+    /// <paramref name="cancellationToken"/> has requested cancellation is rethrown instead of converted, so the caller's
+    /// own cancellation keeps propagating as the .NET convention expects. A cancellation the token did not request, such
+    /// as an inner timeout, is still converted. <see langword="false"/> by default, the earlier behaviour.
+    /// </param>
     /// <returns>The result produced by <paramref name="func"/>, or an error describing the caught exception.</returns>
+    /// <exception cref="OperationCanceledException">
+    /// <paramref name="rethrowCancellation"/> is <see langword="true"/> and <paramref name="cancellationToken"/> requested cancellation.
+    /// </exception>
     public static async Task<ErrorOr<TResult>> ProtectAsync<T, TResult>(
         this T @object,
         Func<T, CancellationToken, Task<ErrorOr<TResult>>> func,
         ErrorType errorType = ErrorType.Unexpected,
         bool configureAwait = false,
+        bool rethrowCancellation = false,
         CancellationToken cancellationToken = default!)
     {
         try
         {
             return await func(@object, cancellationToken).ConfigureAwait(configureAwait);
+        }
+        catch (OperationCanceledException) when (rethrowCancellation && cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
@@ -88,18 +102,32 @@ public static class ObjectExtensions
     /// <param name="errorType">The <see cref="ErrorType"/> assigned to the error when an exception is caught.</param>
     /// <param name="configureAwait">The value forwarded to <c>ConfigureAwait</c> when awaiting <paramref name="func"/>.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe while awaiting <paramref name="func"/>.</param>
+    /// <param name="rethrowCancellation">
+    /// When <see langword="true"/>, an <see cref="OperationCanceledException"/> thrown while
+    /// <paramref name="cancellationToken"/> has requested cancellation is rethrown instead of converted, so the caller's
+    /// own cancellation keeps propagating as the .NET convention expects. A cancellation the token did not request, such
+    /// as an inner timeout, is still converted. <see langword="false"/> by default, the earlier behaviour.
+    /// </param>
     /// <returns><paramref name="object"/> when <paramref name="func"/> completes, or an error describing the caught exception.</returns>
+    /// <exception cref="OperationCanceledException">
+    /// <paramref name="rethrowCancellation"/> is <see langword="true"/> and <paramref name="cancellationToken"/> requested cancellation.
+    /// </exception>
     public static async Task<ErrorOr<T>> ProtectDoAsync<T>(
         this T @object,
         Func<T, CancellationToken, Task> func,
         ErrorType errorType = ErrorType.Unexpected,
         bool configureAwait = false,
+        bool rethrowCancellation = false,
         CancellationToken cancellationToken = default!)
     {
         try
         {
             await func(@object, cancellationToken).ConfigureAwait(configureAwait);
             return @object;
+        }
+        catch (OperationCanceledException) when (rethrowCancellation && cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {

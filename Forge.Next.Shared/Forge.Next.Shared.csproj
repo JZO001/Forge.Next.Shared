@@ -13,7 +13,7 @@
 		<Title>Forge.Next.Shared: Forge Patterns and Practices.</Title>
 		<Product>Forge.Next.Shared: Forge Patterns and Practices.</Product>
 		<PackageId>Forge.Next.Shared</PackageId>
-		<AssemblyVersion>3.1.1.0</AssemblyVersion>
+		<AssemblyVersion>3.2.0.0</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<FileVersion>$(AssemblyVersion)</FileVersion>
 		<Authors>Zoltan Juhasz</Authors>
@@ -23,7 +23,7 @@
 		<PackageOutputPath>../artifacts/</PackageOutputPath>
 		<PackageProjectUrl>https://github.com/JZO001/Forge.Next.Shared</PackageProjectUrl>
 		<RepositoryType>git</RepositoryType>
-		<licenses>https://github.com/JZO001/Forge.Next.Shared#Apache-2.0-1-ov-file</licenses>
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<RepositoryUrl>https://github.com/JZO001/Forge.Next.Shared</RepositoryUrl>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<ProjectGuid>{122158B5-1946-4563-AD72-074AD71B6053}</ProjectGuid>

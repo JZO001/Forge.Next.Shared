@@ -1,0 +1,51 @@
+Version 3.2.0.0
+
+Add opt-in cancellation rethrow and stack-trace omission (v3.2.0)
+
+Add two opt-in switches to the ErrorOr exception helpers: the async
+Protect wrappers can let the caller's own cancellation propagate instead
+of converting it into an error, and the exception-to-error conversion
+can leave the stack trace out of the error metadata. Both default to the
+earlier behaviour. Update the tests, README and package metadata to
+match.
+
+ObjectExtensions:
+- ProtectAsync<T, TResult> and ProtectDoAsync<T>: new optional
+  `bool rethrowCancellation = false` parameter, placed before
+  cancellationToken. When true, an OperationCanceledException thrown
+  while cancellationToken has requested cancellation is rethrown (via a
+  `catch ... when` filter) instead of being converted, following the
+  .NET cancellation convention. A cancellation the token did not request,
+  such as an inner timeout, is still converted into an error.
+- XML docs extended with the new <param> and an <exception> entry for
+  OperationCanceledException.
+
+ExceptionErrorOrExtensions:
+- ToErrorOrError (List<Error>) and ToErrorOrError<TValue>: new optional
+  `bool includeStackTrace = true` parameter. When false, the
+  "stackTrace" metadata entry is omitted from every error in the chain,
+  keeping only "type" and "message" - intended for errors that leave the
+  process (HTTP responses, messages to other services) or reach a user or
+  language model, where the trace is an information leak.
+- The generic overload forwards the flag; XML docs updated accordingly.
+
+Tests:
+- ObjectExtensionsTests: new ProtectAsyncRethrowCancellationTest
+  (rethrows with the option on, converts by default, still converts an
+  untriggered-token TaskCanceledException as the requested ErrorType) and
+  ProtectDoAsyncRethrowCancellationTest; existing cref signatures updated.
+- ExceptionErrorOrExtensionsTests: new
+  ToErrorOrErrorWithoutStackTraceTest covering both overloads over an
+  inner-exception chain; existing cref signatures updated.
+
+README.md:
+- Updated the ProtectAsync, ProtectDoAsync and both ToErrorOrError
+  signatures; added a "Cancellation" section with a rethrowCancellation
+  example and a "Without the stack trace" section with a logging +
+  includeStackTrace: false example.
+
+Project:
+- Bump AssemblyVersion 3.1.1.0 -> 3.2.0.0.
+- Replace the non-standard <licenses> element with
+  <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression> so the
+  NuGet package carries proper license metadata.

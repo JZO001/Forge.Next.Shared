@@ -61,7 +61,7 @@ public class ObjectExtensionsTests
     }
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, CancellationToken)"/>:
+    /// Tests <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, CancellationToken, bool)"/>:
     /// the result is passed through on success, the supplied <see cref="CancellationToken"/> is forwarded to
     /// the function, and a thrown exception becomes an error carrying the requested <see cref="ErrorType"/>.
     /// </summary>
@@ -117,7 +117,7 @@ public class ObjectExtensionsTests
     }
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, CancellationToken)"/>:
+    /// Tests <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, CancellationToken, bool)"/>:
     /// the side-effecting action runs, the supplied <see cref="CancellationToken"/> is forwarded to it, and
     /// the ORIGINAL object is returned on success; a thrown exception becomes an error.
     /// </summary>
@@ -144,6 +144,68 @@ public class ObjectExtensionsTests
         failed.IsError.ShouldBeTrue();
         failed.FirstError.Type.ShouldBe(ErrorType.Unauthorized);
         failed.FirstError.Description.ShouldBe("do-async-boom");
+    }
+
+    /// <summary>
+    /// Tests the <c>rethrowCancellation</c> option of
+    /// <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, CancellationToken, bool)"/>:
+    /// when the caller's own token requested cancellation, the <see cref="OperationCanceledException"/> propagates;
+    /// without the option, or when the token did not request it (an inner timeout), it is still converted.
+    /// </summary>
+    [Fact]
+    public async Task ProtectAsyncRethrowCancellationTest()
+    {
+        SampleDto dto = new() { Id = 1, Name = "x" };
+        using CancellationTokenSource cancelled = new();
+        cancelled.Cancel();
+
+        // The caller cancelled and asked for the cancellation back: it propagates as an exception.
+        await Should.ThrowAsync<OperationCanceledException>(() => dto.ProtectAsync<SampleDto, int>(
+            (_, token) => throw new OperationCanceledException(token),
+            cancellationToken: cancelled.Token,
+            rethrowCancellation: true));
+
+        // The default keeps the earlier behaviour: the cancellation becomes an error.
+        ErrorOr<int> converted = await dto.ProtectAsync<SampleDto, int>(
+            (_, token) => throw new OperationCanceledException(token),
+            cancellationToken: cancelled.Token);
+        converted.IsError.ShouldBeTrue();
+        converted.FirstError.Type.ShouldBe(ErrorType.Unexpected);
+
+        // A cancellation the caller's token did not request (e.g. an inner timeout) is a failure, not the caller's
+        // cancellation: it is converted even with the option on.
+        using CancellationTokenSource live = new();
+        ErrorOr<int> timedOut = await dto.ProtectAsync<SampleDto, int>(
+            (_, _) => throw new TaskCanceledException("timeout"),
+            ErrorType.Failure,
+            cancellationToken: live.Token,
+            rethrowCancellation: true);
+        timedOut.IsError.ShouldBeTrue();
+        timedOut.FirstError.Type.ShouldBe(ErrorType.Failure);
+        timedOut.FirstError.Description.ShouldBe("timeout");
+    }
+
+    /// <summary>
+    /// Tests the <c>rethrowCancellation</c> option of
+    /// <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, CancellationToken, bool)"/>:
+    /// the caller's own cancellation propagates with the option on and is converted without it.
+    /// </summary>
+    [Fact]
+    public async Task ProtectDoAsyncRethrowCancellationTest()
+    {
+        SampleDto dto = new() { Id = 1, Name = "x" };
+        using CancellationTokenSource cancelled = new();
+        cancelled.Cancel();
+
+        await Should.ThrowAsync<OperationCanceledException>(() => dto.ProtectDoAsync(
+            (_, token) => Task.FromCanceled(token),
+            cancellationToken: cancelled.Token,
+            rethrowCancellation: true));
+
+        ErrorOr<SampleDto> converted = await dto.ProtectDoAsync(
+            (_, token) => Task.FromCanceled(token),
+            cancellationToken: cancelled.Token);
+        converted.IsError.ShouldBeTrue();
     }
 
     #endregion

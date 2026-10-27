@@ -355,7 +355,7 @@ if (failed.IsError)
 }
 ```
 
-### `ProtectAsync<T, TResult>(Func<T, CancellationToken, Task<ErrorOr<TResult>>> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default) : Task<ErrorOr<TResult>>`
+### `ProtectAsync<T, TResult>(Func<T, CancellationToken, Task<ErrorOr<TResult>>> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default, bool rethrowCancellation = false) : Task<ErrorOr<TResult>>`
 
 Asynchronous version of `Protect`. The `func` receives the supplied `cancellationToken`, which lets the
 awaited operation observe cancellation; `configureAwait` is forwarded to the internal `ConfigureAwait` call.
@@ -365,6 +365,19 @@ ErrorOr<User> result = await userId.ProtectAsync(
     func: (id, ct) => repository.GetAsync(id, ct),   // returns Task<ErrorOr<User>>
     errorType: ErrorType.NotFound,
     cancellationToken: token);
+```
+
+**Cancellation.** By default every exception is converted, an `OperationCanceledException` included. Pass
+`rethrowCancellation: true` to let the caller's own cancellation propagate as the .NET convention expects: an
+`OperationCanceledException` thrown while `cancellationToken` has requested cancellation is rethrown. A
+cancellation the token did not request, such as an inner timeout, is still converted into an error.
+
+```csharp
+// The user's Stop cancels `token`: the OperationCanceledException reaches the caller instead of an error.
+ErrorOr<User> user = await userId.ProtectAsync(
+    (id, ct) => repository.GetAsync(id, ct),
+    cancellationToken: token,
+    rethrowCancellation: true);
 ```
 
 ### `ProtectDo<T>(Action<T> action, ErrorType errorType = ErrorType.Unexpected) : ErrorOr<T>`
@@ -378,7 +391,7 @@ ErrorOr<Order> result = order.ProtectDo(o => o.Validate());
 // On failure: result.IsError is true.
 ```
 
-### `ProtectDoAsync<T>(Func<T, CancellationToken, Task> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default) : Task<ErrorOr<T>>`
+### `ProtectDoAsync<T>(Func<T, CancellationToken, Task> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default, bool rethrowCancellation = false) : Task<ErrorOr<T>>`
 
 Asynchronous version of `ProtectDo`. The `func` receives the supplied `cancellationToken` so the
 side-effecting operation can observe cancellation. Returns the **original object** on success.
@@ -388,6 +401,8 @@ ErrorOr<Document> result = await document.ProtectDoAsync(
     (d, ct) => storage.SaveAsync(d, ct),
     cancellationToken: token);
 ```
+
+`rethrowCancellation` works as for `ProtectAsync`.
 
 ### Hashing helpers
 
@@ -438,7 +453,7 @@ if (SHA3_256.IsSupported)
 
 Convert an `Exception` (and its inner‑exception chain) into `ErrorOr` errors.
 
-### `ToErrorOrError(this Exception ex, ErrorType expectedErrorType = ErrorType.Unexpected) : List<Error>`
+### `ToErrorOrError(this Exception ex, ErrorType expectedErrorType = ErrorType.Unexpected, bool includeStackTrace = true) : List<Error>`
 
 Walks `ex` and its `InnerException` chain, producing **one `Error` per exception**, ordered outermost →
 innermost. Each error's `Description` is the exception message; its `Metadata` captures the exception's
@@ -464,7 +479,19 @@ catch (Exception ex)
 }
 ```
 
-### `ToErrorOrError<TValue>(this Exception ex, ErrorType expectedErrorType = ErrorType.Unexpected) : ErrorOr<TValue>`
+**Without the stack trace.** Pass `includeStackTrace: false` for errors that leave the process (an HTTP
+response, a message to another service) or reach a user: the metadata keeps `type` and `message`, but not
+`stackTrace`, which would leak the implementation. Log the full exception first.
+
+```csharp
+catch (Exception ex)
+{
+    logger.LogError(ex, "The request failed");
+    await response.WriteAsJsonAsync(ex.ToErrorOrError(includeStackTrace: false));
+}
+```
+
+### `ToErrorOrError<TValue>(this Exception ex, ErrorType expectedErrorType = ErrorType.Unexpected, bool includeStackTrace = true) : ErrorOr<TValue>`
 
 Same conversion, but returns a **failed** `ErrorOr<TValue>` wrapping the whole error list — convenient for
 returning straight out of a method.

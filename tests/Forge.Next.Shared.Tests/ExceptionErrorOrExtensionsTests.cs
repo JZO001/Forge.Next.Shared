@@ -18,7 +18,43 @@ public class ExceptionErrorOrExtensionsTests
     #region ToErrorOrError -> List<Error>
 
     /// <summary>
-    /// Tests <see cref="ExceptionErrorOrExtensions.ToErrorOrError(Exception, ErrorType)"/>: a single
+    /// Tests the <c>includeStackTrace</c> option of
+    /// <see cref="ExceptionErrorOrExtensions.ToErrorOrError(Exception, ErrorType, bool)"/> and
+    /// <see cref="ExceptionErrorOrExtensions.ToErrorOrError{TValue}(Exception, ErrorType, bool)"/>: without it every error
+    /// of the chain keeps its type and message, but no stack trace, so it can leave the process.
+    /// </summary>
+    [Fact]
+    public void ToErrorOrErrorWithoutStackTraceTest()
+    {
+        Exception thrown;
+        try
+        {
+            throw new InvalidOperationException("outer", new ArgumentException("inner"));
+        }
+        catch (Exception ex)
+        {
+            thrown = ex;
+        }
+
+        List<Error> errors = thrown.ToErrorOrError(ErrorType.Failure, includeStackTrace: false);
+
+        errors.Count.ShouldBe(2);
+        foreach (Error error in errors)
+        {
+            error.Type.ShouldBe(ErrorType.Failure);
+            error.Metadata.ShouldNotBeNull();
+            error.Metadata!.ShouldContainKey("type");
+            error.Metadata!.ShouldContainKey("message");
+            error.Metadata!.ShouldNotContainKey("stackTrace");
+        }
+
+        ErrorOr<int> result = thrown.ToErrorOrError<int>(includeStackTrace: false);
+        result.IsError.ShouldBeTrue();
+        result.Errors.ShouldAllBe(error => !error.Metadata!.ContainsKey("stackTrace"));
+    }
+
+    /// <summary>
+    /// Tests <see cref="ExceptionErrorOrExtensions.ToErrorOrError(Exception, ErrorType, bool)"/>: a single
     /// exception yields one error with message/metadata populated, and an inner-exception chain yields one
     /// ordered error per exception.
     /// </summary>
@@ -85,7 +121,7 @@ public class ExceptionErrorOrExtensionsTests
     #region ToErrorOrError<TValue> -> ErrorOr<TValue>
 
     /// <summary>
-    /// Tests <see cref="ExceptionErrorOrExtensions.ToErrorOrError{TValue}(Exception, ErrorType)"/>: the
+    /// Tests <see cref="ExceptionErrorOrExtensions.ToErrorOrError{TValue}(Exception, ErrorType, bool)"/>: the
     /// generic overload produces a failed <see cref="ErrorOr{TValue}"/> wrapping the same error list, in the
     /// same order, with the requested error type.
     /// </summary>
