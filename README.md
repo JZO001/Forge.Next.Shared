@@ -335,7 +335,7 @@ ObjectExtensions.DefaultJsonSerializerOptions.IncludeFields;       // true
 ObjectExtensions.DefaultJsonSerializerOptions.ReferenceHandler;    // ReferenceHandler.Preserve
 ```
 
-### `Protect<T, TResult>(Func<T, ErrorOr<TResult>> func, ErrorType errorType = ErrorType.Unexpected) : ErrorOr<TResult>`
+### `Protect<T, TResult>(Func<T, ErrorOr<TResult>> func, ErrorType errorType = ErrorType.Unexpected, bool includeStackTrace = true) : ErrorOr<TResult>`
 
 Invokes `func` and returns its result. If `func` throws, the exception is caught and converted into an
 `ErrorOr` error whose `Type` is `errorType` and whose `Description` is the exception message (the full
@@ -355,7 +355,7 @@ if (failed.IsError)
 }
 ```
 
-### `ProtectAsync<T, TResult>(Func<T, CancellationToken, Task<ErrorOr<TResult>>> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default, bool rethrowCancellation = false) : Task<ErrorOr<TResult>>`
+### `ProtectAsync<T, TResult>(Func<T, CancellationToken, Task<ErrorOr<TResult>>> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, bool rethrowCancellation = false, bool includeStackTrace = true, CancellationToken cancellationToken = default) : Task<ErrorOr<TResult>>`
 
 Asynchronous version of `Protect`. The `func` receives the supplied `cancellationToken`, which lets the
 awaited operation observe cancellation; `configureAwait` is forwarded to the internal `ConfigureAwait` call.
@@ -380,7 +380,7 @@ ErrorOr<User> user = await userId.ProtectAsync(
     rethrowCancellation: true);
 ```
 
-### `ProtectDo<T>(Action<T> action, ErrorType errorType = ErrorType.Unexpected) : ErrorOr<T>`
+### `ProtectDo<T>(Action<T> action, ErrorType errorType = ErrorType.Unexpected, bool includeStackTrace = true) : ErrorOr<T>`
 
 Runs `action` for its side effects and returns the **original object** on success, or an error if the
 action throws.
@@ -391,7 +391,7 @@ ErrorOr<Order> result = order.ProtectDo(o => o.Validate());
 // On failure: result.IsError is true.
 ```
 
-### `ProtectDoAsync<T>(Func<T, CancellationToken, Task> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, CancellationToken cancellationToken = default, bool rethrowCancellation = false) : Task<ErrorOr<T>>`
+### `ProtectDoAsync<T>(Func<T, CancellationToken, Task> func, ErrorType errorType = ErrorType.Unexpected, bool configureAwait = false, bool rethrowCancellation = false, bool includeStackTrace = true, CancellationToken cancellationToken = default) : Task<ErrorOr<T>>`
 
 Asynchronous version of `ProtectDo`. The `func` receives the supplied `cancellationToken` so the
 side-effecting operation can observe cancellation. Returns the **original object** on success.
@@ -403,6 +403,8 @@ ErrorOr<Document> result = await document.ProtectDoAsync(
 ```
 
 `rethrowCancellation` works as for `ProtectAsync`.
+
+**Without the stack trace.** Every `Protect*` wrapper takes `includeStackTrace` (default `true`, the earlier behaviour) and passes it to `ToErrorOrError`. Pass `false` at a boundary whose errors leave the process or reach a user or a language model, and log the exception itself where the trace is needed.
 
 ### Hashing helpers
 

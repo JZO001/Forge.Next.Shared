@@ -1,51 +1,43 @@
-Version 3.2.0.0
+Version 3.3.0.0
 
-Add opt-in cancellation rethrow and stack-trace omission (v3.2.0)
+Add includeStackTrace option to the Protect wrappers (v3.3.0)
 
-Add two opt-in switches to the ErrorOr exception helpers: the async
-Protect wrappers can let the caller's own cancellation propagate instead
-of converting it into an error, and the exception-to-error conversion
-can leave the stack trace out of the error metadata. Both default to the
-earlier behaviour. Update the tests, README and package metadata to
-match.
+Expose the stack-trace omission that v3.2.0 added to ToErrorOrError on
+all four Protect* wrappers in ObjectExtensions, so a caller can keep the
+trace out of the error metadata without catching and converting the
+exception itself. The option defaults to the earlier behaviour. Update
+the tests, README and version to match.
 
 ObjectExtensions:
-- ProtectAsync<T, TResult> and ProtectDoAsync<T>: new optional
-  `bool rethrowCancellation = false` parameter, placed before
-  cancellationToken. When true, an OperationCanceledException thrown
-  while cancellationToken has requested cancellation is rethrown (via a
-  `catch ... when` filter) instead of being converted, following the
-  .NET cancellation convention. A cancellation the token did not request,
-  such as an inner timeout, is still converted into an error.
-- XML docs extended with the new <param> and an <exception> entry for
-  OperationCanceledException.
+- Protect<T, TResult>, ProtectDo<T>, ProtectAsync<T, TResult> and
+  ProtectDoAsync<T>: new optional `bool includeStackTrace = true`
+  parameter, forwarded to ToErrorOrError in the catch block. When false,
+  the "stackTrace" metadata entry is omitted and only "type" and
+  "message" are kept - intended for boundaries whose errors leave the
+  process or reach a user or language model; log the exception itself
+  where the trace is needed.
+- In the async wrappers the new parameter sits after
+  rethrowCancellation, so cancellationToken stays last.
+- XML docs extended with the new <param>, cross-referencing
+  ExceptionErrorOrExtensions.ToErrorOrError.
 
-ExceptionErrorOrExtensions:
-- ToErrorOrError (List<Error>) and ToErrorOrError<TValue>: new optional
-  `bool includeStackTrace = true` parameter. When false, the
-  "stackTrace" metadata entry is omitted from every error in the chain,
-  keeping only "type" and "message" - intended for errors that leave the
-  process (HTTP responses, messages to other services) or reach a user or
-  language model, where the trace is an information leak.
-- The generic overload forwards the flag; XML docs updated accordingly.
-
-Tests:
-- ObjectExtensionsTests: new ProtectAsyncRethrowCancellationTest
-  (rethrows with the option on, converts by default, still converts an
-  untriggered-token TaskCanceledException as the requested ErrorType) and
-  ProtectDoAsyncRethrowCancellationTest; existing cref signatures updated.
-- ExceptionErrorOrExtensionsTests: new
-  ToErrorOrErrorWithoutStackTraceTest covering both overloads over an
-  inner-exception chain; existing cref signatures updated.
+Tests (ObjectExtensionsTests):
+- New ProtectIncludeStackTraceTest: the stack trace is in the metadata
+  by default, and with includeStackTrace: false it is absent from the
+  errors of all four wrappers while "type" and the message are kept.
+- Protect* cref signatures updated to the new parameter lists; the async
+  ones now also match the actual parameter order.
 
 README.md:
-- Updated the ProtectAsync, ProtectDoAsync and both ToErrorOrError
-  signatures; added a "Cancellation" section with a rethrowCancellation
-  example and a "Without the stack trace" section with a logging +
-  includeStackTrace: false example.
+- Updated the four Protect* signatures; the async ones now list the
+  parameters in their actual order (rethrowCancellation and
+  includeStackTrace before cancellationToken).
+- Added a "Without the stack trace" note for the Protect* wrappers.
 
 Project:
-- Bump AssemblyVersion 3.1.1.0 -> 3.2.0.0.
-- Replace the non-standard <licenses> element with
-  <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression> so the
-  NuGet package carries proper license metadata.
+- Bump AssemblyVersion 3.2.0.0 -> 3.3.0.0.
+
+Compatibility: callers using named arguments or defaults need only a
+recompile. A fully positional async call that passed cancellationToken
+right after rethrowCancellation no longer compiles; pass the token by
+name.

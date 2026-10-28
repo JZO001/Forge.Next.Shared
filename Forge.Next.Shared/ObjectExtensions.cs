@@ -41,6 +41,12 @@ public static class ObjectExtensions
     /// own cancellation keeps propagating as the .NET convention expects. A cancellation the token did not request, such
     /// as an inner timeout, is still converted. <see langword="false"/> by default, the earlier behaviour.
     /// </param>
+    /// <param name="includeStackTrace">
+    /// When <see langword="false"/>, the caught exception's stack trace is left out of the error's metadata, as
+    /// <see cref="ExceptionErrorOrExtensions.ToErrorOrError(Exception, ErrorType, bool)"/> does with the same option. Use it
+    /// at a boundary whose errors leave the process or reach a user or a language model; log the exception itself where
+    /// the trace is needed. <see langword="true"/> by default, the earlier behaviour.
+    /// </param>
     /// <returns>The result produced by <paramref name="func"/>, or an error describing the caught exception.</returns>
     /// <exception cref="OperationCanceledException">
     /// <paramref name="rethrowCancellation"/> is <see langword="true"/> and <paramref name="cancellationToken"/> requested cancellation.
@@ -51,6 +57,7 @@ public static class ObjectExtensions
         ErrorType errorType = ErrorType.Unexpected,
         bool configureAwait = false,
         bool rethrowCancellation = false,
+        bool includeStackTrace = true,
         CancellationToken cancellationToken = default!)
     {
         try
@@ -63,7 +70,7 @@ public static class ObjectExtensions
         }
         catch (Exception ex)
         {
-            return ex.ToErrorOrError<TResult>(errorType);
+            return ex.ToErrorOrError<TResult>(errorType, includeStackTrace);
         }
     }
 
@@ -76,11 +83,18 @@ public static class ObjectExtensions
     /// <param name="object">The object the function operates on.</param>
     /// <param name="func">The function to execute.</param>
     /// <param name="errorType">The <see cref="ErrorType"/> assigned to the error when an exception is caught.</param>
+    /// <param name="includeStackTrace">
+    /// When <see langword="false"/>, the caught exception's stack trace is left out of the error's metadata, as
+    /// <see cref="ExceptionErrorOrExtensions.ToErrorOrError(Exception, ErrorType, bool)"/> does with the same option. Use it
+    /// at a boundary whose errors leave the process or reach a user or a language model; log the exception itself where
+    /// the trace is needed. <see langword="true"/> by default, the earlier behaviour.
+    /// </param>
     /// <returns>The result produced by <paramref name="func"/>, or an error describing the caught exception.</returns>
     public static ErrorOr<TResult> Protect<T, TResult>(
         this T @object,
         Func<T, ErrorOr<TResult>> func,
-        ErrorType errorType = ErrorType.Unexpected)
+        ErrorType errorType = ErrorType.Unexpected,
+        bool includeStackTrace = true)
     {
         try
         {
@@ -88,7 +102,7 @@ public static class ObjectExtensions
         }
         catch (Exception ex)
         {
-            return ex.ToErrorOrError<TResult>(errorType);
+            return ex.ToErrorOrError<TResult>(errorType, includeStackTrace);
         }
     }
 
@@ -108,6 +122,12 @@ public static class ObjectExtensions
     /// own cancellation keeps propagating as the .NET convention expects. A cancellation the token did not request, such
     /// as an inner timeout, is still converted. <see langword="false"/> by default, the earlier behaviour.
     /// </param>
+    /// <param name="includeStackTrace">
+    /// When <see langword="false"/>, the caught exception's stack trace is left out of the error's metadata, as
+    /// <see cref="ExceptionErrorOrExtensions.ToErrorOrError(Exception, ErrorType, bool)"/> does with the same option. Use it
+    /// at a boundary whose errors leave the process or reach a user or a language model; log the exception itself where
+    /// the trace is needed. <see langword="true"/> by default, the earlier behaviour.
+    /// </param>
     /// <returns><paramref name="object"/> when <paramref name="func"/> completes, or an error describing the caught exception.</returns>
     /// <exception cref="OperationCanceledException">
     /// <paramref name="rethrowCancellation"/> is <see langword="true"/> and <paramref name="cancellationToken"/> requested cancellation.
@@ -118,6 +138,7 @@ public static class ObjectExtensions
         ErrorType errorType = ErrorType.Unexpected,
         bool configureAwait = false,
         bool rethrowCancellation = false,
+        bool includeStackTrace = true,
         CancellationToken cancellationToken = default!)
     {
         try
@@ -131,7 +152,7 @@ public static class ObjectExtensions
         }
         catch (Exception ex)
         {
-            return ex.ToErrorOrError<T>(errorType);
+            return ex.ToErrorOrError<T>(errorType, includeStackTrace);
         }
     }
 
@@ -143,11 +164,18 @@ public static class ObjectExtensions
     /// <param name="object">The object the action operates on and that is returned on success.</param>
     /// <param name="action">The action to execute.</param>
     /// <param name="errorType">The <see cref="ErrorType"/> assigned to the error when an exception is caught.</param>
+    /// <param name="includeStackTrace">
+    /// When <see langword="false"/>, the caught exception's stack trace is left out of the error's metadata, as
+    /// <see cref="ExceptionErrorOrExtensions.ToErrorOrError(Exception, ErrorType, bool)"/> does with the same option. Use it
+    /// at a boundary whose errors leave the process or reach a user or a language model; log the exception itself where
+    /// the trace is needed. <see langword="true"/> by default, the earlier behaviour.
+    /// </param>
     /// <returns><paramref name="object"/> when <paramref name="action"/> completes, or an error describing the caught exception.</returns>
     public static ErrorOr<T> ProtectDo<T>(
         this T @object,
         Action<T> action,
-        ErrorType errorType = ErrorType.Unexpected)
+        ErrorType errorType = ErrorType.Unexpected,
+        bool includeStackTrace = true)
     {
         try
         {
@@ -156,7 +184,7 @@ public static class ObjectExtensions
         }
         catch (Exception ex)
         {
-            return ex.ToErrorOrError<T>(errorType);
+            return ex.ToErrorOrError<T>(errorType, includeStackTrace);
         }
     }
 

@@ -33,7 +33,7 @@ public class ObjectExtensionsTests
     #region Protect / ProtectAsync
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.Protect{T, TResult}(T, Func{T, ErrorOr{TResult}}, ErrorType)"/>:
+    /// Tests <see cref="ObjectExtensions.Protect{T, TResult}(T, Func{T, ErrorOr{TResult}}, ErrorType, bool)"/>:
     /// the function's result is passed through on success, and a thrown exception becomes an
     /// <see cref="ErrorOr{TResult}"/> error carrying the requested <see cref="ErrorType"/>.
     /// </summary>
@@ -61,7 +61,7 @@ public class ObjectExtensionsTests
     }
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, CancellationToken, bool)"/>:
+    /// Tests <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, bool, bool, CancellationToken)"/>:
     /// the result is passed through on success, the supplied <see cref="CancellationToken"/> is forwarded to
     /// the function, and a thrown exception becomes an error carrying the requested <see cref="ErrorType"/>.
     /// </summary>
@@ -93,7 +93,7 @@ public class ObjectExtensionsTests
     }
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.ProtectDo{T}(T, Action{T}, ErrorType)"/>: the side-effecting action
+    /// Tests <see cref="ObjectExtensions.ProtectDo{T}(T, Action{T}, ErrorType, bool)"/>: the side-effecting action
     /// runs and the ORIGINAL object is returned on success; a thrown exception becomes an error.
     /// </summary>
     [Fact]
@@ -117,7 +117,7 @@ public class ObjectExtensionsTests
     }
 
     /// <summary>
-    /// Tests <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, CancellationToken, bool)"/>:
+    /// Tests <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, bool, bool, CancellationToken)"/>:
     /// the side-effecting action runs, the supplied <see cref="CancellationToken"/> is forwarded to it, and
     /// the ORIGINAL object is returned on success; a thrown exception becomes an error.
     /// </summary>
@@ -148,7 +148,7 @@ public class ObjectExtensionsTests
 
     /// <summary>
     /// Tests the <c>rethrowCancellation</c> option of
-    /// <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, CancellationToken, bool)"/>:
+    /// <see cref="ObjectExtensions.ProtectAsync{T, TResult}(T, Func{T, CancellationToken, Task{ErrorOr{TResult}}}, ErrorType, bool, bool, bool, CancellationToken)"/>:
     /// when the caller's own token requested cancellation, the <see cref="OperationCanceledException"/> propagates;
     /// without the option, or when the token did not request it (an inner timeout), it is still converted.
     /// </summary>
@@ -187,7 +187,7 @@ public class ObjectExtensionsTests
 
     /// <summary>
     /// Tests the <c>rethrowCancellation</c> option of
-    /// <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, CancellationToken, bool)"/>:
+    /// <see cref="ObjectExtensions.ProtectDoAsync{T}(T, Func{T, CancellationToken, Task}, ErrorType, bool, bool, bool, CancellationToken)"/>:
     /// the caller's own cancellation propagates with the option on and is converted without it.
     /// </summary>
     [Fact]
@@ -206,6 +206,32 @@ public class ObjectExtensionsTests
             (_, token) => Task.FromCanceled(token),
             cancellationToken: cancelled.Token);
         converted.IsError.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// Tests the <c>includeStackTrace</c> option of the four <c>Protect*</c> wrappers: by default the caught exception's
+    /// stack trace is in the error's metadata, as before; with the option off it is not, and the type and the message
+    /// stay.
+    /// </summary>
+    [Fact]
+    public async Task ProtectIncludeStackTraceTest()
+    {
+        SampleDto dto = new() { Id = 1, Name = "x" };
+
+        ErrorOr<int> withTrace = dto.Protect<SampleDto, int>(_ => throw new InvalidOperationException("boom"));
+        withTrace.FirstError.Metadata!.ShouldContainKey("stackTrace");
+
+        ErrorOr<int> sync = dto.Protect<SampleDto, int>(_ => throw new InvalidOperationException("boom"), includeStackTrace: false);
+        ErrorOr<SampleDto> syncDo = dto.ProtectDo(_ => throw new InvalidOperationException("boom"), includeStackTrace: false);
+        ErrorOr<int> async = await dto.ProtectAsync<SampleDto, int>((_, _) => throw new InvalidOperationException("boom"), includeStackTrace: false);
+        ErrorOr<SampleDto> asyncDo = await dto.ProtectDoAsync((_, _) => throw new InvalidOperationException("boom"), includeStackTrace: false);
+
+        foreach (Error error in new[] { sync.FirstError, syncDo.FirstError, async.FirstError, asyncDo.FirstError })
+        {
+            error.Metadata!.ShouldNotContainKey("stackTrace");
+            error.Metadata!.ShouldContainKey("type");
+            error.Description.ShouldBe("boom");
+        }
     }
 
     #endregion
