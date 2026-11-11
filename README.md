@@ -38,7 +38,7 @@ Or via a `PackageReference`:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Forge.Next.Shared" Version="3.0.0" />
+  <PackageReference Include="Forge.Next.Shared" Version="3.3.1" />
 </ItemGroup>
 ```
 
@@ -46,12 +46,23 @@ Or via a `PackageReference`:
 
 | | |
 |---|---|
-| **Target frameworks** | `net48`, `net8.0`, `net9.0`, `net10.0` |
-| **Dependencies** | [`ErrorOr`](https://www.nuget.org/packages/ErrorOr) (`>= 2.1.1`) — used by the `Protect*` and `ToErrorOrError*` APIs. On `net48`, [`Microsoft.Extensions.Logging.Abstractions`](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions) and [`System.Text.Json`](https://www.nuget.org/packages/System.Text.Json) are also pulled in. |
+| **Target frameworks** | `net48`, `net8.0`, `net9.0`, `net10.0`, `net11.0` |
+| **Dependencies** | [`ErrorOr`](https://www.nuget.org/packages/ErrorOr) (`>= 2.1.1`) on every target — used by the `Protect*` and `ToErrorOrError*` APIs. Further packages only where the framework lacks them (see below). |
+
+| Target | Further dependencies |
+|---|---|
+| `net48` | [`Microsoft.Extensions.Logging.Abstractions`](https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions) (`>= 8.0.0`), [`System.Text.Json`](https://www.nuget.org/packages/System.Text.Json) (`>= 8.0.6`) |
+| `net8.0` | `Microsoft.Extensions.Logging.Abstractions` (`>= 8.0.0`) |
+| `net9.0` | `Microsoft.Extensions.Logging.Abstractions` (`>= 9.0.0`) |
+| `net10.0` | `Microsoft.Extensions.Logging.Abstractions` (`>= 10.0.0`) |
+| `net11.0` | none — `Microsoft.Extensions.Logging.Abstractions` is part of the .NET 11 shared framework |
+
+`Microsoft.Extensions.Logging.Abstractions` provides the `ILogger` that [`Event`](#event) and
+[`LogUtils`](#logutils) log through.
 
 > **Note about SHA‑3.** The `GetSHA3_*` helpers are compiled **only for .NET (`NETCOREAPP`) target
 > frameworks** — they are excluded on non‑.NET‑Core targets via `#if NETCOREAPP`. Of this package's targets,
-> `net8.0`/`net9.0`/`net10.0` define `NETCOREAPP` (so the helpers are present there), but **`net48` does not**,
+> `net8.0`/`net9.0`/`net10.0`/`net11.0` define `NETCOREAPP` (so the helpers are present there), but **`net48` does not**,
 > so the SHA‑3 helpers are **absent from the `net48` build**. Additionally, at **runtime** SHA‑3 depends on the
 > operating system's support: where it is unavailable the underlying `SHA3_*.Create()` call throws
 > `PlatformNotSupportedException`. Use `SHA3_256.IsSupported` (and friends) to probe before calling.
@@ -427,10 +438,10 @@ equal hashes.
 | `GetSHA3_512` / `GetSHA3_512_AsInt` | `byte[]` / `int` | 64 bytes | `NETCOREAPP` only † |
 
 > **† SHA‑3 availability.** The `GetSHA3_*` helpers are compiled only for .NET (`NETCOREAPP`) target
-> frameworks — they are wrapped in `#if NETCOREAPP` in the source. All current package targets
-> (`net8.0`/`net9.0`/`net10.0`) define `NETCOREAPP`, so they are present in every shipped build; if you
-> cross‑compile this source against a non‑.NET‑Core target they are omitted. They additionally require
-> runtime OS support — guard calls with `SHA3_256.IsSupported` (see below).
+> frameworks — they are wrapped in `#if NETCOREAPP` in the source. They are present in the
+> `net8.0`/`net9.0`/`net10.0`/`net11.0` builds and absent from the `net48` build, which does not define
+> `NETCOREAPP`. They additionally require runtime OS support — guard calls with `SHA3_256.IsSupported`
+> (see below).
 
 ```csharp
 var customer = new { Id = 7, Name = "Ada" };
@@ -692,8 +703,8 @@ All informational output is written at `Information` level (the unhandled‑exce
 each method is a no‑op when that level isn't enabled. Configure the logger first — until then a no‑op logger
 is used.
 
-> On `net48`, `LogUtils` requires the `Microsoft.Extensions.Logging.Abstractions` package (already a
-> dependency of this library on that target).
+> `LogUtils` uses `Microsoft.Extensions.Logging.Abstractions`: a dependency of this library on `net48` to
+> `net10.0`, and part of the shared framework on `net11.0`. Nothing else needs to be installed.
 
 ### `ConfigureLogging(ILoggerFactory loggerFactory)`
 
