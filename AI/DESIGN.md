@@ -67,3 +67,9 @@ warns on the .NET targets.
   by the parallel target builds at once, and the packages took whatever was there.
 - **The tests run on every target** (3.3.2): `net48` has code of its own, and each build of the library is what a
   consumer gets.
+- **No strong name, on any target:** `ErrorOr` (2.1.1) is not strong-named, and on .NET Framework a strong-named
+  assembly cannot load one that is not: the build warns (CS8002) and the call fails at run time with
+  `FileLoadException` "A strongly-named assembly is required" (0x80131044), checked on 2026-11-15. So the package has
+  no key (`.snk`) and no `SignAssembly`; no published version (3.0.0 to 3.3.2) was strong-named. Signing becomes
+  possible only if every dependency of `net48` is strong-named, and then it changes the assembly identity, so treat
+  it as a breaking change.

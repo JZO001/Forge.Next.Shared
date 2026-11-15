@@ -124,5 +124,11 @@ checks the subscription through its effect (a dynamic assembly with a unique nam
 writes under a lock, because while the tracing is on, test classes running in parallel log their assembly loads into
 it from other threads.
 
+**Strong naming, asked by Zoltán the same day:** the `net48` build was once meant to be strong-named, and the
+`Properties/AssemblyInfo.cs` is gone. Findings: no signing setting or key file, and no `AssemblyInfo.cs` in the
+repository's history (it starts on 2026-06-29; the empty `Properties` folder dates from 2026-06-30); none of the local
+packages is strong-named. Zoltán recalled the reason: `ErrorOr` is not strong-named, which a probe confirmed (see
+`DESIGN.md`). It stays unsigned.
+
 **The fix plan** of 2026-11-12 was a working file; with the work done, Zoltán had it deleted, and the knowledge base no
 longer refers to it.
