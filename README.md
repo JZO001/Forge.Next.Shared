@@ -38,7 +38,7 @@ Or via a `PackageReference`:
 
 ```xml
 <ItemGroup>
-  <PackageReference Include="Forge.Next.Shared" Version="3.3.1" />
+  <PackageReference Include="Forge.Next.Shared" Version="3.3.2" />
 </ItemGroup>
 ```
 
@@ -263,6 +263,21 @@ new[] { "a", "b", "c" }.ForEach(Console.WriteLine);
 // null is ignored — no exception:
 IEnumerable<int>? nothing = null;
 nothing.ForEach(x => Console.WriteLine(x)); // does nothing
+```
+
+### `WithIndex<T>(this IEnumerable<T> source) : IEnumerable<(T item, int index)>`
+
+Pairs each element with its zero‑based position, so a `foreach` loop gets the index without a counter of its
+own. The projection is deferred, like LINQ's `Select`: the source is enumerated when the result is. Unlike
+`ForEach`, a `null` source is not ignored: the call throws `ArgumentNullException`.
+
+```csharp
+string[] names = { "a", "b", "c" };
+
+foreach ((string name, int i) in names.WithIndex())
+{
+    Console.WriteLine($"{i}: {name}");   // 0: a, 1: b, 2: c
+}
 ```
 
 ### `IsDeepEqual(this IEnumerable? first, IEnumerable? second) : bool`
@@ -722,6 +737,11 @@ LogUtils.ConfigureLogging(null);            // disable again
 
 Logs current process details (id, priority, name, machine, session, start time, start‑info).
 
+> The start info of the current process is available on `net48` only: .NET Framework returns an empty
+> `ProcessStartInfo`, whose values are logged (the Windows‑only `Domain` and `LoadUserProfile` included). On
+> `net8.0` to `net11.0`, `Process.StartInfo` throws for a process that was not started through that `Process`
+> object, so the log says `StartInfo is not available.` instead.
+
 ### `LogDomainInfo()`
 
 Logs current `AppDomain` details (id, directories, friendly name, trust flags, and — on .NET Framework —
@@ -742,7 +762,8 @@ LogUtils.LogLoadedAssemblies();
 
 Starts (`true`) or stops (`false`) logging each newly loaded assembly by subscribing to / unsubscribing from
 `AppDomain.AssemblyLoad`. The current state is exposed by the read‑only `IsSubscribedForAssemblyLoad`
-property.
+property. Idempotent and thread‑safe: `true` while the tracing is on (for example a second `LogAll()`) keeps it
+on, with one subscription. Before 3.3.2, a second `true` turned the tracing off.
 
 ```csharp
 LogUtils.TraceAssemblyLoads(true);    // log assemblies as they load

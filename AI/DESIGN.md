@@ -31,10 +31,15 @@ All types are public and static, except `InitializationException`.
 **What differs on `net48`:**
 - no SHA-3 helpers (`#if NETCOREAPP` in `ObjectExtensions`);
 - `LogUtils` logs the .NET Framework-only data: the AppDomain setup information, `Assembly.CodeBase` instead of
-  `Location`, `GlobalAssemblyCache`.
+  `Location`, `GlobalAssemblyCache`;
+- `LogUtils.LogProcessInfo` logs the start info of the current process on `net48` only, without an `#if`:
+  `Process.GetCurrentProcess().StartInfo` is an empty `ProcessStartInfo` on .NET Framework and throws
+  `InvalidOperationException` on .NET (checked on 2026-11-15), where the log says "StartInfo is not available."
 
-`#if IS_WINDOWS` in `LogUtils.LogProcessInfo` guards two `ProcessStartInfo` properties (`Domain`, `LoadUserProfile`),
-but nothing defines the symbol, so those lines are never compiled (see `OPEN.md`).
+The Windows-only `ProcessStartInfo.Domain` and `LoadUserProfile` are logged behind
+`RuntimeInformation.IsOSPlatform(OSPlatform.Windows)` (3.3.2; before, behind an `#if IS_WINDOWS` that nothing
+defined). The check compiles on every target, and the platform analyzer accepts it as a guard: without it, CA1416
+warns on the .NET targets.
 
 ## Why each choice was made
 
@@ -57,3 +62,8 @@ but nothing defines the symbol, so those lines are never compiled (see `OPEN.md`
   either framework, and stays usable on every target.
 - **Hashing through JSON:** any object can be hashed without implementing an interface; `ReferenceHandler.Preserve`
   handles cycles, `IncludeFields` takes fields into account.
+- **One XML documentation file per target** (3.3.2): `GenerateDocumentationFile` without `DocumentationFile`, so each
+  target writes its own file under `obj/<configuration>/<target>/`. A shared file in the project folder was written
+  by the parallel target builds at once, and the packages took whatever was there.
+- **The tests run on every target** (3.3.2): `net48` has code of its own, and each build of the library is what a
+  consumer gets.

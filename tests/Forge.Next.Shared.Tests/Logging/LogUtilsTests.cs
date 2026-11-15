@@ -1,3 +1,5 @@
+using System.Reflection;
+using System.Reflection.Emit;
 using Forge.Next.Shared.Logging;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -55,7 +57,14 @@ public sealed class LogUtilsTests : IDisposable
         {
             // Mirror a real logger: respect the enabled-level gate, then record the formatted text.
             if (!IsEnabled(logLevel)) return;
-            Entries.Add(formatter(state, exception));
+
+            // While assembly-load tracing is on, assemblies loaded by tests of other classes (xunit runs the test
+            // classes in parallel) are logged from their threads too, so the list is written under a lock.
+            string message = formatter(state, exception);
+            lock (Entries)
+            {
+                Entries.Add(message);
+            }
         }
 
         private sealed class NoopDisposable : IDisposable
@@ -134,6 +143,37 @@ public sealed class LogUtilsTests : IDisposable
     }
 
     /// <summary>
+    /// Tests the start-info part of <see cref="LogUtils.LogProcessInfo"/>. The test host was not started through
+    /// the <see cref="System.Diagnostics.Process"/> object <c>Process.GetCurrentProcess()</c> returns, so the
+    /// outcome depends on the framework:
+    /// <list type="bullet">
+    /// <item>on .NET, <c>Process.StartInfo</c> throws, and the block logs that the start info is not available;</item>
+    /// <item>on .NET Framework, it returns an empty start info, whose values are logged, including the
+    /// Windows-only <c>Domain</c> and <c>LoadUserProfile</c> (.NET Framework runs on Windows only, so the
+    /// Windows check in <see cref="LogUtils"/> lets them through).</item>
+    /// </list>
+    /// </summary>
+    [Fact]
+    public void LogProcessInfoStartInfoTest()
+    {
+        RecordingLogger logger = ConfigureRecordingLogger(LogLevel.Information);
+        LogUtils.LogProcessInfo();
+
+#if NETCOREAPP
+        // .NET: the start info of the current process cannot be read, so none of its lines are logged.
+        logger.Entries.ShouldContain(e => e.Contains("StartInfo is not available"));
+        logger.Entries.ShouldNotContain(e => e.Contains("StartInfo, file name"));
+        logger.Entries.ShouldNotContain(e => e.Contains("StartInfo, domain"));
+#else
+        // .NET Framework: the (empty) start info is logged, the Windows-only properties included.
+        logger.Entries.ShouldContain(e => e.Contains("StartInfo, file name"));
+        logger.Entries.ShouldContain(e => e.Contains("StartInfo, domain"));
+        logger.Entries.ShouldContain(e => e.Contains("StartInfo, load user profile"));
+        logger.Entries.ShouldNotContain(e => e.Contains("StartInfo is not available"));
+#endif
+    }
+
+    /// <summary>
     /// Tests <see cref="LogUtils.LogDomainInfo"/>: it logs the AppDomain block when enabled, nothing when disabled.
     /// </summary>
     [Fact]
@@ -182,8 +222,14 @@ public sealed class LogUtilsTests : IDisposable
             logger.Entries.ShouldContain(e => e.Contains("Domain, Id"));
             logger.Entries.ShouldContain(e => e.Contains("Loaded assemblies"));
 
-            // LogAll also subscribes to the unhandled-exception event.
+            // LogAll also subscribes to the unhandled-exception event and starts the assembly-load tracing.
             LogUtils.IsSubscribedForAppDomainUnhandledException.ShouldBeTrue();
+            LogUtils.IsSubscribedForAssemblyLoad.ShouldBeTrue();
+
+            // A second LogAll keeps both on (before 3.3.2 it turned the assembly-load tracing off).
+            LogUtils.LogAll();
+            LogUtils.IsSubscribedForAppDomainUnhandledException.ShouldBeTrue();
+            LogUtils.IsSubscribedForAssemblyLoad.ShouldBeTrue();
         }
         finally
         {
@@ -246,6 +292,54 @@ public sealed class LogUtilsTests : IDisposable
         LogUtils.IsSubscribedForAssemblyLoad.ShouldBeTrue();
 
         // Disabling unsubscribes (removing the global handler) and clears the flag.
+        LogUtils.TraceAssemblyLoads(false);
+        LogUtils.IsSubscribedForAssemblyLoad.ShouldBeFalse();
+    }
+
+    /// <summary>
+    /// Tests that <see cref="LogUtils.TraceAssemblyLoads(bool)"/> is idempotent: starting the tracing while it is on
+    /// keeps it on with a single subscription, and stopping it while it is off keeps it off. Before 3.3.2, the
+    /// second <c>TraceAssemblyLoads(true)</c> unsubscribed the handler.
+    /// <para>
+    /// The subscription is checked through its effect, not only through the flag: a dynamic assembly with a unique
+    /// name is defined (that raises <see cref="AppDomain.AssemblyLoad"/> on every target), and its full name must be
+    /// logged exactly once: zero would mean no subscription, two a double one. Counting by the unique name keeps
+    /// assemblies that other test classes load in parallel out of the count.
+    /// </para>
+    /// </summary>
+    [Fact]
+    public void TraceAssemblyLoadsIdempotentTest()
+    {
+        RecordingLogger logger = ConfigureRecordingLogger(LogLevel.Information);
+        string assemblyName = "LogUtilsTestsDynamic" + Guid.NewGuid().ToString("N");
+
+        try
+        {
+            // Start from a known state, then start the tracing twice: it must stay on.
+            LogUtils.TraceAssemblyLoads(false);
+            LogUtils.TraceAssemblyLoads(true);
+            LogUtils.TraceAssemblyLoads(true);
+            LogUtils.IsSubscribedForAssemblyLoad.ShouldBeTrue();
+
+            // Raise one AssemblyLoad event for an assembly nothing else can load.
+            AssemblyBuilder.DefineDynamicAssembly(new AssemblyName(assemblyName), AssemblyBuilderAccess.Run);
+        }
+        finally
+        {
+            // Stop before reading the entries, so no other thread adds to them while they are counted.
+            LogUtils.TraceAssemblyLoads(false);
+        }
+
+        // The handler ran exactly once for the new assembly: subscribed, and only once.
+        string[] entries;
+        lock (logger.Entries)
+        {
+            entries = logger.Entries.ToArray();
+        }
+        entries.Count(e => e.Contains("Assembly, full name: " + assemblyName)).ShouldBe(1);
+
+        // Stopping twice keeps the tracing off.
+        LogUtils.IsSubscribedForAssemblyLoad.ShouldBeFalse();
         LogUtils.TraceAssemblyLoads(false);
         LogUtils.IsSubscribedForAssemblyLoad.ShouldBeFalse();
     }

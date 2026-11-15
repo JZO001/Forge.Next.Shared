@@ -11,7 +11,7 @@ namespace Forge.Next.Shared.Tests.IO;
 /// The class implements <see cref="IDisposable"/> so xunit disposes it after the test runs; that gives us a
 /// hook to clean up any directories created on disk during the write-probe scenarios.
 /// </summary>
-public sealed class PathHelperTests : IDisposable
+public sealed class PathExtensionsTests : IDisposable
 {
     /// <summary>Tracks the temp directories handed out by <see cref="CreateUniqueTempPath"/> for cleanup.</summary>
     private readonly List<string> _createdDirectories = new();

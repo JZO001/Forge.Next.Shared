@@ -75,17 +75,20 @@ hashing, file-system probing, WinForms/WPF reflection helpers, diagnostic loggin
   - explicit types (no `var`), file-scoped namespaces, one type per file named after the type;
   - sub-folders map to sub-namespaces (`IO`, `UI`, `Logging`);
   - `LangVersion` 12 for every target, `Nullable` and `ImplicitUsings` on;
-  - XML documentation on every public member (`GenerateDocumentationFile`), saying what null means, what comes back on
-    failure, and why.
-- **Tests** (`tests/Forge.Next.Shared.Tests`, `net10.0`):
-  - xUnit 2, Shouldly, NSubstitute;
+  - XML documentation on every public member (`GenerateDocumentationFile`, no `DocumentationFile`: each target writes
+    its own file under `obj/`), saying what null means, what comes back on failure, and why.
+- **Tests** (`tests/Forge.Next.Shared.Tests`, every target of the library, `net48` to `net11.0`):
+  - xUnit 2, Shouldly, NSubstitute; `LangVersion` 14 for every target (`net48` would default to C# 7.3, and C# 12
+    makes the Shouldly `ShouldContainKey` calls ambiguous on `net9.0`);
+  - code that a target lacks is tested behind the same `#if` as in the library (the SHA-3 tests: `#if NETCOREAPP`);
   - one test class per tested class (`<Class>Tests`), test methods named after the tested member with a `Test`
     suffix (`ProtectIncludeStackTraceTest`), richly commented (see `prompts/init_tests.txt`).
 - **Before handing over a change:**
   - a 0-warning build of the solution, all targets;
-  - all tests;
-  - when a target was added or a dependency changed: the tests against the new target as well (see
-    `AI/VERIFICATION.md`), and the package's `.nuspec` dependency groups checked.
+  - all tests, on every target;
+  - when a target is added: add it to the test project's `TargetFrameworks` as well;
+  - when a target was added or a dependency changed: the package's `.nuspec` dependency groups checked (see
+    `AI/VERIFICATION.md`).
 - **Documentation:** every public change is reflected in `README.md` in the same step: the signature, an example, and
   the target availability in "Requirements".
 - **Release:**

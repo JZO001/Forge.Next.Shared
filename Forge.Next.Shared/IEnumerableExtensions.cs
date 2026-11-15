@@ -30,12 +30,24 @@ public static class IEnumerableExtensions
     }
 
     /// <summary>
-    ///   <para>
-    /// Usage:</para>
-    ///   <para>foreach (var (item, i) in list.WithIndex())<br />{<br />    Console.WriteLine($"{i}: {item}");<br />}</para>
+    /// Pairs each element of a sequence with its zero-based position, so a <see langword="foreach"/> loop gets
+    /// the index without a counter of its own:
+    /// <code>
+    /// foreach ((string item, int i) in list.WithIndex())
+    /// {
+    ///     Console.WriteLine($"{i}: {item}");
+    /// }
+    /// </code>
+    /// The projection is deferred, like <see cref="Enumerable.Select{TSource, TResult}(IEnumerable{TSource}, Func{TSource, int, TResult})"/>:
+    /// <paramref name="source"/> is enumerated when the result is, and again on every enumeration of the result.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="source">The source.</param>
+    /// <typeparam name="T">The element type.</typeparam>
+    /// <param name="source">The sequence to project. Must not be <see langword="null"/>.</param>
+    /// <returns>The elements of <paramref name="source"/> in order, each paired with its zero-based index.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="source"/> is <see langword="null"/>. Thrown by the call itself, not later by the enumeration;
+    /// unlike <see cref="ForEach{T}(IEnumerable{T}, Action{T})"/>, a <see langword="null"/> source is not ignored.
+    /// </exception>
     public static IEnumerable<(T item, int index)> WithIndex<T>(this IEnumerable<T> source) =>
         source.Select((item, index) => (item, index));
 

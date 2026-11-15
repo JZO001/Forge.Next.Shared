@@ -7,8 +7,8 @@ using Xunit;
 namespace Forge.Next.Shared.Tests;
 
 /// <summary>
-/// Unit tests for <see cref="IEnumerableExtensions"/> — the <c>ForEach</c> helper and both the
-/// non-generic and generic <c>IsDeepEqual</c> overloads.
+/// Unit tests for <see cref="IEnumerableExtensions"/> — the <c>ForEach</c> and <c>WithIndex</c> helpers and
+/// both the non-generic and generic <c>IsDeepEqual</c> overloads.
 ///
 /// The private <c>ElementsDeepEqual</c> helper is not visible from the test assembly, so it is
 /// exercised indirectly through the public <c>IsDeepEqual</c> methods (nested-sequence and
@@ -43,6 +43,48 @@ public class IEnumerableExtensionsTests
         IEnumerable<int>? nullItems = null;
         Should.NotThrow(() => nullItems!.ForEach(actionForNull));
         actionForNull.DidNotReceive().Invoke(Arg.Any<int>());
+    }
+
+    #endregion
+
+    #region WithIndex
+
+    /// <summary>
+    /// Tests <see cref="IEnumerableExtensions.WithIndex{T}(IEnumerable{T})"/>: every element is paired with its
+    /// zero-based position in order, an empty source gives an empty result, the projection is deferred (it sees
+    /// elements added after the call), and a <see langword="null"/> source throws at the call itself.
+    /// </summary>
+    [Fact]
+    public void WithIndexTest()
+    {
+        // Each element is paired with its zero-based index, in the order of the source.
+        (string item, int index)[] expected = { ("a", 0), ("b", 1), ("c", 2) };
+        new[] { "a", "b", "c" }.WithIndex().ToList().ShouldBe(expected);
+
+        // The documented usage: deconstruction in a foreach loop gives the item and its index.
+        List<string> seen = new();
+        foreach ((string item, int i) in new[] { "x", "y" }.WithIndex())
+        {
+            seen.Add($"{i}:{item}");
+        }
+        seen.ShouldBe(new[] { "0:x", "1:y" });
+
+        // An empty source projects to an empty sequence.
+        Array.Empty<int>().WithIndex().ShouldBeEmpty();
+
+        // Deferred projection: an element added after WithIndex was called still appears, because the
+        // source is enumerated only when the result is.
+        List<int> source = new() { 10 };
+        IEnumerable<(int item, int index)> projected = source.WithIndex();
+        source.Add(20);
+        (int item, int index)[] expectedDeferred = { (10, 0), (20, 1) };
+        projected.ToList().ShouldBe(expectedDeferred);
+
+        // Unlike ForEach, a null source is not ignored: the call itself throws (Enumerable.Select checks its
+        // argument eagerly), so the exception does not wait for an enumeration.
+        IEnumerable<int>? nullSource = null;
+        ArgumentNullException ex = Should.Throw<ArgumentNullException>(() => nullSource!.WithIndex());
+        ex.ParamName.ShouldBe("source");
     }
 
     #endregion

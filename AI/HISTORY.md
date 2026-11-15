@@ -24,7 +24,7 @@ The generated `Forge.Next.Shared.xml` documentation file was removed from the re
 ## 2026-07-11 – 3.1.1: `WithIndex`
 
 `IEnumerableExtensions.WithIndex<T>()` projects a sequence into `(item, index)` tuples, for
-`foreach ((T item, int i) in list.WithIndex())`. Not in the README and not tested yet (see `OPEN.md`).
+`foreach ((T item, int i) in list.WithIndex())`. Its README section and test came in 3.3.2.
 
 ## 2026-10-27 – 3.2.0: opt-in cancellation rethrow, stack trace omission
 
@@ -77,3 +77,52 @@ The knowledge base first carried over a rule from `Forge.Next.LocalWebShell`: no
 Zoltán: that wording was unfortunate. The intent is that the projects which use this library are not named. The other
 `Forge.*` projects, and the libraries this package uses (ErrorOr, the `Microsoft.*` libraries), may be named. The rule
 in `CLAUDE.md` now says so.
+
+## 2026-11-11 – The package icon: the Forge mark
+
+Zoltán chose a new icon for the Forge packages: the Forge mark, a hexagon with a smaller, filled hexagon inside, the two
+joined by three lines, on a dark rounded tile, so it reads on a light and on a dark ground. `logo.png` is now this mark,
+128 by 128 pixels (NuGet's advice), in place of the earlier logo, which looked much like the Jedi Order's emblem
+(Lucasfilm), a trademark risk. The project packs `logo.png` as before. The published versions keep the old icon; the
+next version carries the new one.
+
+## 2026-11-15 – 3.3.2: the open findings fixed
+
+**Zoltán's change:** `AssemblyVersion` 3.3.1.0 → 3.3.2.0, 3.3.1 being published (Zoltán, 2026-11-15). The README's
+installation example follows it.
+
+**Asked by Zoltán:** the fixes of the findings listed in `OPEN.md` on 2026-11-12, with the recommended options. No
+public signature changed.
+- **One XML documentation file per target.** The `DocumentationFile` line, the
+  `<None Remove="Forge.Next.Shared.xml" />` item and the `.gitignore` entry were removed, and the stray file deleted.
+  `GenerateDocumentationFile` stays, so each target writes its own file under `obj/<configuration>/<target>/`, and
+  the parallel target builds no longer share one file.
+- **The tests on every target.** The test project targets `net48`, `net8.0`, `net9.0`, `net10.0` and
+  `net11.0`, with `LangVersion` 14. Every target, not only `net10.0` and `net11.0`, because `net48` has code of its
+  own. 14, because `net48` would default to C# 7.3, and C# 12 (the library's) makes seven Shouldly
+  `ShouldContainKey`/`ShouldNotContainKey` calls ambiguous on `net9.0`; 14 is what `net10.0` used by default, so its
+  run did not change. No test had to change; the SHA-3 tests stay behind `#if NETCOREAPP`.
+- **`WithIndex`:** a README section, a full XML documentation (zero-based, deferred, a `null` source throws
+  `ArgumentNullException` at the call, unlike `ForEach`), and `WithIndexTest`.
+- **`#if IS_WINDOWS`** in `LogUtils.LogProcessInfo`: of the three options (define the symbol, check at run time,
+  remove the lines), the run-time check `RuntimeInformation.IsOSPlatform(OSPlatform.Windows)`. The lines were meant
+  to be logged on Windows; the check needs no `#if` and compiles on every target; a symbol defined at build time
+  would describe the build machine, not the one the package runs on. What the log says changes on `net48` only (two
+  more lines): on .NET, `Process.GetCurrentProcess().StartInfo` throws, so the start info is never logged there.
+  The README and the XML documentation now say so; `LogProcessInfoStartInfoTest` covers both cases.
+- **Test file names:** the test files and classes follow the tested class: `IO/PathExtensionsTests.cs` (was `PathHelperTests`)
+  and `UI/UIExtensionsTests.cs` (was `UIReflectionExtensionsTests`).
+- **The `net11.0` dependency:** a comment in the csproj says why `net11.0` has no logging package reference.
+
+**Found on the way, fixed at Zoltán's request the same day:** `LogUtils.TraceAssemblyLoads(true)` while the tracing
+was on unsubscribed the handler: the method unsubscribed whenever it was subscribed, whatever `state` was, so a second
+`TraceAssemblyLoads(true)` or a second `LogAll()` stopped the tracing, against its documentation. Now it unsubscribes
+only for `false`, so it is idempotent with at most one subscription. A behaviour fix, in the patch version 3.3.2; the
+README and the XML documentation say that versions before 3.3.2 turned the tracing off. `TraceAssemblyLoadsIdempotentTest`
+checks the subscription through its effect (a dynamic assembly with a unique name is logged exactly once), and
+`LogAllTest` calls `LogAll` twice; both fail with the old condition on every target. The tests' `RecordingLogger`
+writes under a lock, because while the tracing is on, test classes running in parallel log their assembly loads into
+it from other threads.
+
+**The fix plan** of 2026-11-12 was a working file; with the work done, Zoltán had it deleted, and the knowledge base no
+longer refers to it.

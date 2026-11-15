@@ -10,7 +10,7 @@ namespace Forge.Next.Shared.Tests;
 
 /// <summary>
 /// A fake WinForms control with an instance handler method. Deriving from the fake
-/// <c>System.Windows.Forms.Control</c> (declared in <c>UIReflectionExtensionsTests</c>) makes
+/// <c>System.Windows.Forms.Control</c> (declared in <c>UIExtensionsTests</c>) makes
 /// <see cref="UIExtensions.IsWinFormsControl"/> return true, and the inherited <c>Invoke</c>
 /// records every delegate that is marshalled onto the "UI thread".
 /// </summary>

@@ -1,10 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net10.0</TargetFramework>
+		<!-- Every target of the library, so each build of it is tested (net48 has code of its own). -->
+		<TargetFrameworks>net48;net8.0;net9.0;net10.0;net11.0</TargetFrameworks>
 		<RootNamespace>Forge.Next.Shared.Tests</RootNamespace>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<!-- One language version for every target: net48 would default to C# 7.3, and with C# 12 the Shouldly
+		     ShouldContainKey calls are ambiguous on net9.0. 14 is what net10.0 used by default. -->
+		<LangVersion>14.0</LangVersion>
 		<IsTestProject>true</IsTestProject>
 	</PropertyGroup>
 

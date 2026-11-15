@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Forge.Next.Shared.Logging;
 
@@ -84,6 +85,10 @@ public static class LogUtils
     /// Starts or stops tracing assembly loads by subscribing to / unsubscribing from the
     /// <see cref="AppDomain.AssemblyLoad"/> event. While active, information about each newly loaded assembly
     /// is logged. Updates <see cref="IsSubscribedForAssemblyLoad"/> accordingly; thread-safe.
+    /// <para>
+    /// Idempotent: starting while the tracing is on, or stopping while it is off, changes nothing, and the handler is
+    /// subscribed at most once. (Before 3.3.2, starting while the tracing was on stopped it.)
+    /// </para>
     /// </summary>
     /// <param name="state"><see langword="true"/> to start tracing assembly loads; <see langword="false"/> to stop.</param>
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -94,7 +99,7 @@ public static class LogUtils
             AppDomain.CurrentDomain.AssemblyLoad += new AssemblyLoadEventHandler(CurrentDomain_AssemblyLoad);
             IsSubscribedForAssemblyLoad = true;
         }
-        else if (IsSubscribedForAssemblyLoad)
+        else if (!state && IsSubscribedForAssemblyLoad)
         {
             AppDomain.CurrentDomain.AssemblyLoad -= new AssemblyLoadEventHandler(CurrentDomain_AssemblyLoad);
             IsSubscribedForAssemblyLoad = false;
@@ -105,6 +110,12 @@ public static class LogUtils
     /// Logs information about the current process — id, base priority, name, machine, session, start time and
     /// (when available) start-info details — at <c>LogLevel.Information</c>. Does nothing when
     /// information logging is disabled.
+    /// <para>
+    /// For the current process, <see cref="Process.StartInfo"/> is available on .NET Framework only, as an empty
+    /// <see cref="ProcessStartInfo"/> whose values are logged, the Windows-only <c>Domain</c> and
+    /// <c>LoadUserProfile</c> included. On .NET it throws, because the process was not started through that
+    /// <see cref="Process"/> object, and the log says that the start info is not available.
+    /// </para>
     /// </summary>
     public static void LogProcessInfo()
     {
@@ -128,10 +139,13 @@ public static class LogUtils
                     _logger.LogInformation("LOGUTILS, StartInfo, arguments: {Arguments}", p.StartInfo.Arguments);
                     _logger.LogInformation("LOGUTILS, StartInfo, create no window: {CreateNoWindow}", p.StartInfo.CreateNoWindow);
                     _logger.LogInformation("LOGUTILS, StartInfo, file name: {FileName}", p.StartInfo.FileName);
-#if IS_WINDOWS
-                    _logger.LogInformation("LOGUTILS, StartInfo, domain: {Domain}", p.StartInfo.Domain);
-                    _logger.LogInformation("LOGUTILS, StartInfo, load user profile: {LoadUserProfile}", p.StartInfo.LoadUserProfile);
-#endif
+                    // Windows-only properties: .NET supports them only on Windows. The check works on every
+                    // target (.NET Framework runs on Windows only) and is the guard the platform analyzer knows.
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        _logger.LogInformation("LOGUTILS, StartInfo, domain: {Domain}", p.StartInfo.Domain);
+                        _logger.LogInformation("LOGUTILS, StartInfo, load user profile: {LoadUserProfile}", p.StartInfo.LoadUserProfile);
+                    }
                     _logger.LogInformation("LOGUTILS, StartInfo, redirect standard error: {RedirectStandardError}", p.StartInfo.RedirectStandardError);
                     _logger.LogInformation("LOGUTILS, StartInfo, redirect standard input: {RedirectStandardInput}", p.StartInfo.RedirectStandardInput);
                     _logger.LogInformation("LOGUTILS, StartInfo, user name: {UserName}", p.StartInfo.UserName);

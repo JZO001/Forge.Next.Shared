@@ -110,7 +110,7 @@ namespace Forge.Next.Shared.Tests
     /// <see langword="null"/> argument and the <c>InvokeOn*</c> methods return <see langword="null"/>; none of
     /// them throw. The tests assert exactly that.
     /// </summary>
-    public class UIReflectionExtensionsTests
+    public class UIExtensionsTests
     {
         /// <summary>
         /// Tests <see cref="UIExtensions.IsWinFormsControl(object)"/>: non-controls return false,
